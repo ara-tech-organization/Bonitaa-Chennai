@@ -452,7 +452,8 @@
   gap: 18px;
 }
 
-/* The popup is only 460px wide — two columns squeeze the phone field. */
+/* Stacked by default in the popup; `.invite .form__row` pairs them back up at
+   widths where the card is wide enough to hold two boxes. */
 .form--compact .form__row {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -2735,8 +2736,14 @@
 }
 
 .invite .field__label {
-  margin-bottom: 5px;
-  font-size: 0.72rem;
+  margin-bottom: 4px;
+  font-size: 0.68rem;
+}
+
+/* Name and phone stay one per row in the popup, as in the booking form — the
+   fields read down a single column and every label sits over its own box. */
+.invite .form__row {
+  gap: 11px;
 }
 
 /* Field height is the single biggest lever left: three of them at 14px block
@@ -3338,6 +3345,27 @@
      width — one per row keeps each on a single line. */
   .badges {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* …except in the popup, which is the one place height costs more than a
+     little air. "Mylapore" and "Velachery" are both short enough to hold a
+     line at half this width, and the pair saves a whole field's height. */
+  .invite .badges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .invite .badge {
+    gap: 8px;
+    padding: 9px 10px;
+  }
+
+  .invite .badge__text strong {
+    font-size: 0.86rem;
+  }
+
+  .invite .badge__text small {
+    font-size: 0.68rem;
   }
 
   .services__grid,

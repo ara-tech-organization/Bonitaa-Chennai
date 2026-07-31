@@ -190,9 +190,13 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
         />
       )}
 
+      {/* Shorter in the popup, where the long form wraps to two lines and the
+          card is already fighting for the viewport. */}
       <p className="form__note">
         <Icon name="Lock" size={14} />
-        Your information stays 100% confidential. No spam calls, ever.
+        {compact
+          ? '100% confidential. No spam calls, ever.'
+          : 'Your information stays 100% confidential. No spam calls, ever.'}
       </p>
 
       <button type="submit" className="btn btn--gold btn--block btn--lg" disabled={status === 'sending'}>

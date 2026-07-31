@@ -9,6 +9,12 @@ const TOTAL = RESULTS.length
 const PANEL_ID = 'rr-panel'
 const STACKED = '(max-width: 1080px)'
 
+/* Slider cadence, and how long a touch of the controls holds it off. The hold
+   is longer than the interval on purpose: advancing 5s after someone has just
+   chosen a case themselves reads as the page overriding them. */
+const SLIDE_EVERY = 5000
+const HOLD_AFTER_TOUCH = 9000
+
 /** 0 → "01". The case index is set in display numerals, so it needs the zero. */
 const pad = (n) => String(n + 1).padStart(2, '0')
 
@@ -31,6 +37,10 @@ export default function Results() {
   const rowsRef = useRef([])
   const trackRef = useRef(null)
   const frame = useRef(0)
+  /* A timestamp rather than a boolean: a swipe has no reliable "finished"
+     event across browsers, so the pause expires on its own instead of waiting
+     for one that may never arrive and stalling the slider for good. */
+  const pausedUntil = useRef(0)
 
   const [active, setActive] = useState(0)
   /* Autoplay only runs when the stage is both on screen and unattended. */
@@ -67,6 +77,10 @@ export default function Results() {
   /** Wrapping index change with no side effects — the autoplay path. */
   const step = useCallback((next) => setActive((next + TOTAL) % TOTAL), [])
 
+  const pause = () => {
+    pausedUntil.current = Date.now() + HOLD_AFTER_TOUCH
+  }
+
   /** One slide's worth of travel, measured off the DOM rather than assumed. */
   const slideWidth = () => {
     const track = trackRef.current
@@ -77,12 +91,42 @@ export default function Results() {
   }
 
   /** Moves the slider; `active` follows from the scroll handler, not from here. */
-  const slideTo = useCallback((next) => {
+  const slideTo = useCallback(
+    (next) => {
+      const track = trackRef.current
+      if (!track) return
+      /* Every caller of this is a person — an arrow, a dot. Autoplay goes
+         through `advanceSlider`, so it never holds itself off. */
+      pause()
+      const i = (next + TOTAL) % TOTAL
+      track.scrollTo({ left: i * slideWidth(), behavior: reduced ? 'auto' : 'smooth' })
+    },
+    [reduced],
+  )
+
+  /**
+   * The autoplay hand-off. Reads its position back off the track rather than
+   * from `active`, so a swipe that lands between two slides still advances to
+   * the right one and the timer can never work from a stale index.
+   */
+  const advanceSlider = useCallback(() => {
     const track = trackRef.current
-    if (!track) return
-    const i = (next + TOTAL) % TOTAL
-    track.scrollTo({ left: i * slideWidth(), behavior: reduced ? 'auto' : 'smooth' })
-  }, [reduced])
+    const w = slideWidth()
+    if (!track || !w) return
+    const next = (Math.round(track.scrollLeft / w) + 1) % TOTAL
+    track.scrollTo({ left: next * w, behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    if (!stacked || reduced || !onScreen) return
+    const id = window.setInterval(() => {
+      /* Skip rather than reset the interval — the cadence stays steady and the
+         only cost of a paused tick is one missed advance. */
+      if (Date.now() < pausedUntil.current) return
+      advanceSlider()
+    }, SLIDE_EVERY)
+    return () => window.clearInterval(id)
+  }, [stacked, reduced, onScreen, advanceSlider])
 
   /* The scroll position is the source of truth while swiping — reading it back
      is what keeps the counter and dots honest mid-gesture. */
@@ -199,6 +243,10 @@ export default function Results() {
                 className="rr__track"
                 ref={trackRef}
                 onScroll={onTrackScroll}
+                /* A finger on the track holds the timer off, so autoplay can
+                   never take the slide out from under a swipe in progress. */
+                onPointerDown={pause}
+                onTouchStart={pause}
                 aria-label="Patient cases"
               >
                 {RESULTS.map((item, i) => (
