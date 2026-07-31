@@ -466,8 +466,7 @@
   color: var(--gold-700);
 }
 
-.field__wrap input,
-.field__wrap select {
+.field__wrap input {
   width: 100%;
   min-width: 0;
   padding: 14px 0;
@@ -494,11 +493,6 @@
   color: var(--ink-soft);
 }
 
-.field__wrap select {
-  appearance: none;
-  cursor: pointer;
-}
-
 .field__wrap--select {
   padding-right: 44px;
 }
@@ -511,9 +505,161 @@
 }
 
 .field__wrap:has(input[aria-invalid='true']),
-.field__wrap:has(select[aria-invalid='true']) {
+.field__wrap[aria-invalid='true'] {
   border-color: #d5716b;
   background: #fdf6f5;
+}
+
+/* ==========================================================================
+   CUSTOM DROPDOWN
+   A native <select> will not take a border-radius, a gold ring or a panel
+   animation from CSS — its option list is drawn by the OS. This is the same
+   field frame with a listbox of our own beneath it.
+   ========================================================================== */
+
+.sel {
+  position: relative;
+}
+
+/* The trigger wears .field__wrap, so it inherits the frame, the focus ring and
+   the error state from the text inputs and can never drift away from them. */
+.sel__trigger {
+  width: 100%;
+  padding-block: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Focus itself is already handled by .field__wrap:focus-within, which a button
+   satisfies for its own focus. This only adds the open state: focus has not
+   moved, but the field is plainly the active one and must look it. The default
+   focus outline is dropped because the ring below replaces it. */
+.sel.is-open .sel__trigger {
+  border-color: var(--gold-500);
+  background: var(--white);
+  box-shadow: 0 0 0 4px rgba(216, 174, 54, 0.14);
+}
+
+.sel__trigger:focus-visible {
+  outline: none;
+}
+
+.sel.is-open .sel__trigger > svg:first-child {
+  color: var(--gold-700);
+}
+
+.sel__value {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Matches the real placeholder colour on the text inputs beside it. */
+.sel__value.is-placeholder {
+  color: #a9a29a;
+}
+
+.sel__caret {
+  transition: transform 0.35s var(--ease);
+}
+
+.sel.is-open .sel__caret {
+  transform: rotate(180deg);
+  color: var(--gold-700);
+}
+
+/* ---------- Panel ----------
+   Stays mounted so it can animate open and shut; `inert` on the closed state
+   is what actually removes it from tab order and from the a11y tree. */
+
+.sel__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  padding: 6px;
+  border-radius: var(--r-md);
+  background: var(--white);
+  box-shadow:
+    inset 0 0 0 1px var(--gold-200),
+    0 24px 50px -22px rgba(23, 18, 8, 0.34);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.985);
+  transform-origin: top center;
+  transition:
+    opacity 0.28s var(--ease-soft),
+    transform 0.34s var(--ease),
+    visibility 0s linear 0.34s;
+}
+
+.sel.is-open .sel__panel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  /* Visibility flips immediately on the way in, and only after the fade out. */
+  transition-delay: 0s, 0s, 0s;
+}
+
+.sel__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sel__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 12px 14px;
+  border-radius: var(--r-sm);
+  font-size: 0.93rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background 0.22s var(--ease-soft),
+    color 0.22s var(--ease-soft);
+}
+
+/* One highlight, driven by both the pointer and the arrow keys — hover and
+   keyboard focus must never light two different rows at once. */
+.sel__option.is-active {
+  background: var(--gold-050);
+  color: var(--ink);
+}
+
+.sel__option.is-selected {
+  font-weight: 500;
+  color: var(--gold-900);
+}
+
+.sel__option-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.sel__tick {
+  flex: none;
+  color: var(--gold-600);
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 0.25s var(--ease-soft),
+    transform 0.35s var(--ease);
+}
+
+.sel__option.is-selected .sel__tick {
+  opacity: 1;
+  transform: none;
 }
 
 .field__error {

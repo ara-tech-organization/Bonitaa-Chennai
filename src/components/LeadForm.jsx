@@ -2,8 +2,13 @@ import { useState } from 'react'
 import { BRANCHES, CALL_TIMES } from '../data'
 import { normalizePhone, submitLead, validatePhone } from '../submitLead'
 import Icon from './Icon'
+import Select from './Select'
 
 const EMPTY = { name: '', phone: '', branch: '', time: '' }
+
+/* Shaped once at module scope — the dropdown compares options by identity when
+   it scrolls the highlight into view, so it must not get a new array each render. */
+const BRANCH_OPTIONS = BRANCHES.map((b) => ({ value: b.name, label: `${b.name}, Chennai` }))
 
 /**
  * The one enquiry form on the page. `variant="compact"` drops the call-time
@@ -15,10 +20,14 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
 
-  const field = (key) => (e) => {
-    setValues((v) => ({ ...v, [key]: e.target.value }))
+  const set = (key, next) => {
+    setValues((v) => ({ ...v, [key]: next }))
     setErrors((err) => (err[key] ? { ...err, [key]: undefined } : err))
   }
+
+  const field = (key) => (e) => set(key, e.target.value)
+  /* The custom dropdown hands back a value, not an event. */
+  const pick = (key) => (next) => set(key, next)
 
   const validate = () => {
     const next = {}
@@ -113,28 +122,16 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
         </label>
       </div>
 
-      <label className="field" htmlFor={`${idPrefix}-branch`}>
-        <span className="field__label">Select Branch</span>
-        <span className="field__wrap field__wrap--select">
-          <Icon name="MapPin" size={17} />
-          <select
-            id={`${idPrefix}-branch`}
-            name="branch"
-            value={values.branch}
-            onChange={field('branch')}
-            aria-invalid={Boolean(errors.branch)}
-          >
-            <option value="">Choose your nearest clinic</option>
-            {BRANCHES.map((b) => (
-              <option key={b.id} value={b.name}>
-                {b.name}, Chennai
-              </option>
-            ))}
-          </select>
-          <Icon name="ChevronDown" size={17} className="field__caret" />
-        </span>
-        {errors.branch && <span className="field__error">{errors.branch}</span>}
-      </label>
+      <Select
+        id={`${idPrefix}-branch`}
+        label="Select Branch"
+        icon="MapPin"
+        placeholder="Choose your nearest clinic"
+        options={BRANCH_OPTIONS}
+        value={values.branch}
+        onChange={pick('branch')}
+        error={errors.branch}
+      />
 
       {!compact && (
         <fieldset className="field field--choice">
