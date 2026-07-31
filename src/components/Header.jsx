@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import logo from '../assets/Logo.png'
 import { CLINIC } from '../data'
 import { scrollToBooking, useCall } from '../callStore'
@@ -22,6 +22,10 @@ export default function Header() {
   const [open, setOpen] = useState(false)
   const { requestCall } = useCall()
 
+  const burgerRef = useRef(null)
+  const closeRef = useRef(null)
+  const wasOpen = useRef(false)
+
   useScrollLock(open)
 
   useEffect(() => {
@@ -29,6 +33,16 @@ export default function Header() {
     const onKey = (e) => e.key === 'Escape' && setOpen(false)
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
+  /* The drawer sits above the header, so the burger is covered the moment the
+     panel opens — focus has to move to the panel's own close button, and come
+     back to the burger when the panel goes away. Guarded on a previous open,
+     so this never steals focus on first render. */
+  useEffect(() => {
+    if (open) closeRef.current?.focus()
+    else if (wasOpen.current) burgerRef.current?.focus()
+    wasOpen.current = open
   }, [open])
 
   return (
@@ -74,17 +88,40 @@ export default function Header() {
           <button
             type="button"
             className="hdr__burger"
-            aria-label={open ? 'Close menu' : 'Open menu'}
+            ref={burgerRef}
+            aria-label="Open menu"
             aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+            aria-controls="mobile-menu"
+            onClick={() => setOpen(true)}
           >
-            <Icon name={open ? 'X' : 'Menu'} size={22} />
+            {/* Always the burger — it is covered by the panel once open, so
+                switching it to an X only ever showed a control nobody could
+                see. Closing belongs to the panel's own button. */}
+            <Icon name="Menu" size={22} />
           </button>
         </div>
       </div>
 
       <div className={`drawer${open ? ' is-open' : ''}`} onClick={() => setOpen(false)}>
-        <nav className="drawer__panel" onClick={(e) => e.stopPropagation()} aria-label="Mobile menu">
+        <nav
+          className="drawer__panel"
+          id="mobile-menu"
+          onClick={(e) => e.stopPropagation()}
+          aria-label="Mobile menu"
+        >
+          <div className="drawer__top">
+            <img className="drawer__logo" src={logo} alt={CLINIC.name} width="196" height="49" />
+            <button
+              type="button"
+              ref={closeRef}
+              className="drawer__close"
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+            >
+              <Icon name="X" size={20} />
+            </button>
+          </div>
+
           {NAV.map((item, i) => (
             <a
               key={item.href}

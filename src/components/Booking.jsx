@@ -48,7 +48,11 @@ export default function Booking() {
           </div>
         </div>
 
-        <div className="booking__card reveal" style={{ '--delay': '110ms' }}>
+        {/* The scroll target for every "Book" CTA on the page. It is the card,
+            not the section: stacked on mobile the section begins with the
+            assurances copy, so landing on #book put the form a screen below
+            the fold and the button appeared to go to the wrong place. */}
+        <div className="booking__card reveal" id="book-form" style={{ '--delay': '110ms' }}>
           <div className="booking__card-top">
             <h3>Request a callback</h3>
             <span className="booking__badge">

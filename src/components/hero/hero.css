@@ -1,143 +1,113 @@
 /* ==========================================================================
-   HERO — photographic, copy set in the artwork's white space
-   Scoped to .hero so nothing leaks into the page's gold system.
+   HERO — dark ground, gold light
+   No artwork behind the copy: the hero's picture is the before/after frame in
+   the second column, and everything behind it is a deep warm ground with two
+   blurred gold blooms, all drawn in CSS with no image request.
+
+   The section is the page's one dark surface, so it carries its own palette
+   rather than borrowing the light one. Every colour the hero sets comes from
+   these tokens — change them here and the whole section follows.
    ========================================================================== */
 
 .hero {
-  /* Local alias; the stack itself is the page-wide display face — Poppins,
-     the same family the body copy is set in. */
-  --display: var(--font-display);
-  /* Sampled from Hero.png's own empty region, so the artwork's edges melt
-     into the section instead of showing a seam where it ends. */
+  /* Local alias; the stack itself is the page-wide display face. */
+  --serif: var(--font-display);
+
+  /* Warm near-black, deliberately not navy — it is --ink taken darker, so the
+     hero reads as the same brand at low key rather than a different one. */
+  --hero-bg: #14100a;
+  --hero-lift: #241c10;
+  --hero-ink: #fdf8ee;
+  --hero-soft: rgba(253, 248, 238, 0.74);
+  --hero-muted: rgba(253, 248, 238, 0.48);
+  --hero-line: rgba(229, 197, 88, 0.28);
+  /* The print in the frame stays paper — it is a photograph, not chrome. */
   --paper: #fefefe;
 
   position: relative;
-  /* Slightly wider than the artwork's own 3:2, which trims ~8% off the top of
-     the image — just the decorative arc, well clear of the model's hair at
-     19.1% down. Everything else renders full-bleed at full size. */
-  aspect-ratio: 1.63 / 1;
-  /* Floor for short or narrow windows, where 3:2 alone would not clear the
-     copy. Below it the image letterboxes slightly against matching paper. */
-  min-height: min(94svh, 720px);
+  /* Height comes from the copy and the frame beside it. */
+  min-height: min(94svh, 880px);
   display: flex;
-  /* Centred against the artwork, so the copy sits level with the model rather
-     than riding the top edge. The asymmetric padding below lifts it slightly
-     off true centre, which keeps it clear of the wave along the bottom. */
   align-items: center;
   overflow: hidden;
   isolation: isolate;
-  background: var(--paper);
-  /* Top clears the 84px fixed header; the heavier bottom value biases the
-     centred copy upward, away from the wave across the artwork's base. */
-  padding-block: clamp(96px, 9.5vh, 120px) clamp(80px, 14vh, 200px);
+  color: var(--hero-ink);
+  background: linear-gradient(158deg, var(--hero-lift) 0%, var(--hero-bg) 46%, #0d0a06 100%);
+  /* Top clears the 84px fixed header. */
+  padding-block: clamp(116px, 13vh, 168px) clamp(76px, 11vh, 124px);
 }
 
-/* Full-bleed: the image spans the whole section, so the copy overlays its
-   blank region rather than sitting in a column beside it. */
-.hero__bg {
+.hero::before,
+.hero::after {
+  content: '';
   position: absolute;
-  inset: 0;
   z-index: 0;
-}
-
-/* ==========================================================================
-   MEDIA
-   ========================================================================== */
-
-.hm {
-  position: absolute;
-  inset: 0;
+  border-radius: 50%;
   pointer-events: none;
+  filter: blur(90px);
 }
 
-/* Anchored bottom-right, so the only thing the section's ratio trims is the
-   top of the artwork. On short windows where the min-height floor takes over,
-   the overflow comes off the left instead — which is blank paper, not
-   composition. The model, products and logo are never touched. */
-.hm__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: right bottom;
+/* Two gold blooms. They carry far more weight on a dark ground than they did
+   on paper — on cream they were a tint, here they are the section's light. */
+.hero::before {
+  width: clamp(300px, 38vw, 560px);
+  height: clamp(300px, 38vw, 560px);
+  top: -14%;
+  left: -6%;
+  background: radial-gradient(circle, rgba(216, 174, 54, 0.3) 0%, transparent 70%);
 }
 
-/* Contrast guarantee where the copy overlaps the artwork's white region.
-   Uses the sampled paper colour, so it tints nothing — it only ensures the
-   text never sits on the model at intermediate widths. */
-.hm__wash {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    96deg,
-    var(--paper) 0%,
-    rgba(254, 254, 254, 0.94) 28%,
-    rgba(254, 254, 254, 0.55) 42%,
-    rgba(254, 254, 254, 0) 54%
-  );
-}
-
-/* The contained image ends exactly on the section's bottom edge, which left a
-   visible hairline where the artwork met the page. This dissolves it. */
-.hm__foot {
-  position: absolute;
-  inset: auto 0 -1px;
-  height: 26%;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(254, 254, 254, 0.55) 58%,
-    var(--paper) 88%,
-    var(--paper) 100%
-  );
-}
-
-/* Film grain — inline SVG turbulence, no image request. */
-.hm__grain {
-  position: absolute;
-  inset: 0;
-  opacity: 0.16;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+.hero::after {
+  width: clamp(220px, 30vw, 440px);
+  height: clamp(220px, 30vw, 440px);
+  right: -5%;
+  bottom: -12%;
+  background: radial-gradient(circle, rgba(201, 168, 120, 0.22) 0%, transparent 70%);
 }
 
 /* ==========================================================================
    GRID
    ========================================================================== */
 
-/* Not the page's centred 1560px shell. The image is full-bleed, so the space
-   the copy may occupy is measured off the viewport, not off a centred column —
-   a centred shell pushed the copy inward and straight onto the artwork. */
+/* Wider than the page's 1200px shell but still centred and capped — with no
+   full-bleed artwork left to measure against, the copy and the frame are a
+   pair of columns and want a reading width, not the raw viewport. */
 .hero__grid {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding-inline: clamp(20px, 4vw, 72px);
+  /* 1400px with even columns left a wide dead band down the middle: the copy
+     stops at its 62ch measure and the frame is only ~380px, so both columns
+     were far wider than the content inside them. Capping the section tighter
+     and sizing the second column to the frame itself closes that gap. */
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 4vw, 64px);
   display: grid;
-  grid-template-columns: minmax(0, 54fr) minmax(0, 46fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+  gap: clamp(28px, 4vw, 56px);
   align-items: center;
 }
 
-/* Two caps, whichever is smaller:
-   - 76ch  — the credentials line on one line, its widest child.
-   - 38vw  — keeps every line inside the artwork's clear zone, which begins at
-             42.8% across in the band the copy occupies (measured from the
-             pixels, not estimated). */
+/* Measured on the credentials line, the copy's widest child. The old 38vw cap
+   existed to keep every line off the artwork; with the artwork gone, the grid
+   column is the only constraint that matters. */
 .hero__copy {
-  max-width: min(76ch, 38vw);
+  max-width: 62ch;
   width: 100%;
   will-change: transform, opacity;
 }
 
 .hero__eyebrow {
   display: inline-block;
-  margin-bottom: clamp(12px, 1.6vw, 18px);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--champ-300);
+  margin-bottom: clamp(20px, 2.4vw, 28px);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hero-line);
   font-size: 0.67rem;
   font-weight: 500;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--champ-700);
+  color: var(--gold-400);
 }
 
 /* ---------- Headline ---------- */
@@ -151,13 +121,12 @@
      so the ceiling drops accordingly — at the old 4.5rem the longest line
      overran the column and the reveal mask clipped it. */
   font-size: clamp(1.85rem, 3.1vw, 3.5rem);
-  /* Three short lines want tight leading — at 1.14 they read as three separate
-     statements stacked up rather than one headline, and the gold line floated
-     loose in the middle of the gap. Poppins' large x-height carries the
-     legibility, so the lines can close right up. */
-  line-height: 1.07;
+  /* Tight, but not airless. At 1.07 the ascenders of one line very nearly met
+     the descenders of the one above; this keeps the three lines reading as a
+     single headline while giving each room to be its own line. */
+  line-height: 1.16;
   letter-spacing: -0.035em;
-  color: var(--ink);
+  color: var(--hero-ink);
 }
 
 .hero__line {
@@ -185,7 +154,9 @@
    otherwise very level line rather than as stress. */
 .hero__word.is-accent {
   font-weight: 600;
-  background: linear-gradient(104deg, var(--champ-700), var(--gold-600) 48%, var(--champ-600));
+  /* Lifted well above the page's gold ramp: --champ-700 and --gold-600 are
+     mid-tones tuned for cream and all but disappear against this ground. */
+  background: linear-gradient(104deg, var(--gold-400), var(--gold-300) 46%, var(--gold-500));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -197,11 +168,11 @@
 .hero__sub {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: clamp(16px, 2vw, 22px);
+  gap: 10px;
+  margin-top: clamp(26px, 3vw, 36px);
   font-size: clamp(0.76rem, 0.82vw, 0.86rem);
   font-weight: 500;
-  color: var(--champ-800);
+  color: var(--hero-soft);
 }
 
 .hero__sub-item {
@@ -210,10 +181,12 @@
   gap: 8px;
   padding: 7px 15px;
   border-radius: var(--r-full);
-  background: rgba(255, 255, 255, 0.72);
+  /* A lift off the ground rather than a tint over it — glass that brightens
+     is what reads as raised on a dark surface. */
+  background: rgba(253, 248, 238, 0.05);
   backdrop-filter: blur(10px) saturate(150%);
   -webkit-backdrop-filter: blur(10px) saturate(150%);
-  box-shadow: inset 0 0 0 1px rgba(201, 168, 120, 0.42);
+  box-shadow: inset 0 0 0 1px var(--hero-line);
   white-space: nowrap;
   transition:
     transform 0.4s var(--ease),
@@ -232,7 +205,7 @@
 
 .hero__sub-item:hover {
   transform: translateY(-2px);
-  box-shadow: inset 0 0 0 1px rgba(201, 168, 120, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(229, 197, 88, 0.7);
 }
 
 .hero__lede {
@@ -240,10 +213,10 @@
      Poppins runs narrower per ch than the cap implies, and the fourth line
      carried only a few words. */
   max-width: 54ch;
-  margin-top: clamp(12px, 1.5vw, 17px);
+  margin-top: clamp(22px, 2.6vw, 30px);
   font-size: clamp(0.92rem, 0.95vw, 1rem);
   line-height: 1.7;
-  color: var(--ink-soft);
+  color: var(--hero-soft);
 }
 
 /* ---------- Magnetic CTAs ---------- */
@@ -254,7 +227,7 @@
   flex-wrap: nowrap;
   align-items: center;
   gap: 12px;
-  margin-top: clamp(20px, 2.4vw, 28px);
+  margin-top: clamp(30px, 3.4vw, 42px);
 }
 
 .mbtn {
@@ -290,9 +263,10 @@
     background 0.4s var(--ease-soft);
 }
 
+/* Same fill as every other CTA on the page — see --grad-cta in index.css. */
 .mbtn--solid {
-  color: #fffdf8;
-  background: linear-gradient(122deg, var(--gold-800), var(--gold-500) 52%, var(--gold-700));
+  color: var(--cta-ink);
+  background: var(--grad-cta);
   background-size: 200% 100%;
   box-shadow: 0 16px 38px -16px rgba(139, 101, 20, 0.6);
   transition:
@@ -334,133 +308,303 @@
   left: 130%;
 }
 
+/* Outlined, not filled. The page's .btn--outline is a light gold plate, which
+   on this ground would read as a second solid CTA competing with the first —
+   here the secondary action is a gold rule around the dark surface itself. */
 .mbtn--glass {
-  color: var(--champ-800);
-  background: rgba(255, 255, 255, 0.62);
+  color: var(--gold-300);
+  background: rgba(253, 248, 238, 0.04);
   backdrop-filter: blur(14px) saturate(170%);
   -webkit-backdrop-filter: blur(14px) saturate(170%);
-  box-shadow:
-    inset 0 0 0 1px rgba(201, 168, 120, 0.5),
-    0 12px 30px -20px rgba(109, 80, 39, 0.4);
-  transition: box-shadow 0.45s var(--ease);
+  box-shadow: inset 0 0 0 1.5px rgba(229, 197, 88, 0.42);
+  transition:
+    color 0.35s var(--ease-soft),
+    background 0.4s var(--ease-soft),
+    box-shadow 0.45s var(--ease);
 }
 
 .mbtn--glass:hover {
-  box-shadow:
-    inset 0 0 0 1px rgba(201, 168, 120, 0.92),
-    0 16px 36px -18px rgba(109, 80, 39, 0.34);
+  color: var(--gold-200);
+  background: rgba(253, 248, 238, 0.09);
+  box-shadow: inset 0 0 0 1.5px rgba(229, 197, 88, 0.85);
 }
 
-/* ---------- Trust strip ---------- */
+/* ==========================================================================
+   BEFORE / AFTER SHOWCASE
+   A framed print in the hero's second column, cycling through real cases.
+   Everything gold lives in the frame, the brackets and the sweep — never on
+   the photograph.
+   ========================================================================== */
 
-.hero__strip {
+.hero__showcase {
+  position: relative;
+  z-index: 2;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 0;
-  margin: clamp(20px, 2.4vw, 28px) 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.77rem;
-  letter-spacing: 0.015em;
-  color: var(--muted);
+  justify-content: flex-end;
 }
 
-.hero__strip li {
-  display: flex;
-  align-items: center;
+/* Fills its column rather than sitting inside it at a fixed width — the column
+   is already sized to the frame, so any cap here would only reopen the gap. */
+.ba {
+  position: relative;
+  width: 100%;
 }
 
-/* Bullet lives on the separator, so it never orphans onto a wrapped line. */
-.hero__strip li + li::before {
+/* Warm bloom under the stack, so the frame sits in light rather than on a
+   flat field. Sized past the print and blurred beyond its own edges. */
+.ba::before {
   content: '';
-  width: 3px;
-  height: 3px;
-  margin-inline: 12px;
+  position: absolute;
+  inset: 6% -12% -8%;
   border-radius: 50%;
-  background: var(--champ-400);
+  background: radial-gradient(closest-side, rgba(216, 174, 54, 0.4), transparent 72%);
+  filter: blur(38px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Two frames fanned behind the print. Rotation only — no content — so they
+   cost nothing and read as the rest of the case files underneath. Barely
+   there: at the light theme's 55% white they read as bright slabs on this
+   ground rather than as paper stacked under the print. */
+.ba__ghost {
+  position: absolute;
+  border-radius: 22px;
+  background: rgba(253, 248, 238, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(229, 197, 88, 0.2);
+  pointer-events: none;
+}
+
+.ba__ghost--1 {
+  inset: 12px -8px -8px 11px;
+  transform: rotate(1.6deg);
+  z-index: 1;
+}
+
+.ba__ghost--2 {
+  inset: 24px -15px -15px 22px;
+  transform: rotate(3.2deg);
+  z-index: 0;
+}
+
+.ba__frame {
+  position: relative;
+  z-index: 2;
+  aspect-ratio: 4 / 5;
+  /* Explicit, so the ratio always has a definite width to resolve against —
+     the frame carries no intrinsic size of its own. */
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(170deg, var(--paper), #f7f1e6);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(229, 197, 88, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 40px 90px -34px rgba(0, 0, 0, 0.7);
+}
+
+/* `contain`, not `cover` — each source is a before/after collage, and a crop
+   would cut into the comparison itself. */
+.ba__shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(1.04);
+  transition:
+    opacity 0.85s var(--ease-soft),
+    transform 1.5s var(--ease);
+}
+
+.ba__shot.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.ba__stamp {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  padding: 6px 12px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(201, 168, 120, 0.45);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--champ-800);
+}
+
+.ba__stamp i {
+  margin-inline: 3px;
+  font-style: normal;
+  color: var(--gold-600);
+}
+
+/* Gold line that travels down the print once on every change of case — the
+   detail that makes the swap read as a reveal rather than a slideshow. */
+.ba__scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 4;
+  background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.85), transparent);
+  animation: ba-scan 1.5s var(--ease-soft) 1;
+  pointer-events: none;
+}
+
+@keyframes ba-scan {
+  from {
+    top: -2%;
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  to {
+    top: 102%;
+    opacity: 0;
+  }
+}
+
+/* Grounds the caption without tinting the photograph above it. */
+.ba__vignette {
+  position: absolute;
+  inset: auto 0 0;
+  height: 34%;
+  z-index: 3;
+  background: linear-gradient(to top, rgba(23, 18, 8, 0.5), transparent);
+  pointer-events: none;
+}
+
+.ba__caption {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fffaf0;
+  text-shadow: 0 1px 10px rgba(23, 18, 8, 0.5);
+}
+
+.ba__dot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold-400);
+}
+
+/* Corner brackets, set outside the frame. A mount, not a viewfinder. */
+.ba__edge {
+  position: absolute;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--gold-500);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.ba__edge--tl {
+  top: -6px;
+  left: -6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.ba__edge--tr {
+  top: -6px;
+  right: -6px;
+  border-left: 0;
+  border-bottom: 0;
+}
+
+.ba__edge--br {
+  right: -6px;
+  bottom: -6px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.ba__edge--bl {
+  bottom: -6px;
+  left: -6px;
+  border-right: 0;
+  border-top: 0;
 }
 
 /* ==========================================================================
    RESPONSIVE — a distinct mobile composition, not a squeezed desktop
    ========================================================================== */
 
+/* md / sm / xs — the frame moves under the copy rather than beside it, and
+   the section becomes a single centred column. */
+/* The frame has a floor of its own (the ghosts fan out past it), so the copy
+   gives up the width rather than squeezing the picture. */
 @media (max-width: 1180px) {
   .hero__grid {
-    grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+    gap: clamp(24px, 3vw, 40px);
   }
 }
 
-/* md / sm / xs — the artwork stays the section's background at every width.
-   It is never demoted to a band under the copy; instead the copy moves to the
-   top of the frame and the scrim turns vertical, so the words read against
-   washed paper while the photograph holds the lower half of the screen. */
 @media (max-width: 1080px) {
   .hero {
-    /* The desktop ratio is driven by the artwork's composition beside the
-       copy; stacked, height comes from the copy plus room for the image. */
-    aspect-ratio: auto;
-    min-height: min(96svh, 800px);
+    min-height: 0;
     align-items: flex-start;
-    padding-block: clamp(96px, 13vh, 128px) clamp(48px, 9vh, 96px);
+    padding-block: clamp(96px, 13vh, 128px) clamp(48px, 9vh, 88px);
   }
 
   .hero__grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 52px);
   }
 
   .hero__copy {
     max-width: 100%;
   }
 
-  /* Bias the crop away from the right edge so the model stays in frame as the
-     viewport narrows, rather than being pushed out of it. */
-  .hm__img {
-    object-position: 74% bottom;
+  /* Centred once stacked — left-aligned under full-width copy it read as a
+     stray element rather than the section's picture. Capped, because a frame
+     stretched to a tablet's full width dwarfs the copy above it. */
+  .hero__showcase {
+    justify-content: center;
   }
 
-  .hm__wash {
-    background: linear-gradient(
-      177deg,
-      var(--paper) 0%,
-      rgba(254, 254, 254, 0.96) 30%,
-      rgba(254, 254, 254, 0.72) 46%,
-      rgba(254, 254, 254, 0.2) 68%,
-      rgba(254, 254, 254, 0) 84%
-    );
-  }
-
-  .hm__foot {
-    height: 18%;
+  .ba {
+    width: min(100%, 380px);
   }
 }
 
+/* The sticky action bar is on screen from the first frame at this width, so
+   the hero has to end above it — otherwise the trust strip sits underneath. */
 @media (max-width: 760px) {
   .hero {
-    min-height: min(98svh, 760px);
-  }
-
-  /* Narrower crops need the wash to hold longer before the artwork appears. */
-  .hm__wash {
-    background: linear-gradient(
-      177deg,
-      var(--paper) 0%,
-      rgba(254, 254, 254, 0.97) 36%,
-      rgba(254, 254, 254, 0.78) 54%,
-      rgba(254, 254, 254, 0.24) 74%,
-      rgba(254, 254, 254, 0) 88%
-    );
-  }
-
-  .hm__img {
-    object-position: 78% bottom;
+    padding-bottom: calc(clamp(48px, 8vh, 88px) + 72px);
   }
 }
 
 @media (max-width: 520px) {
   .hero {
-    min-height: min(96svh, 680px);
-    padding-block: clamp(88px, 12vh, 108px) clamp(40px, 7vh, 72px);
+    padding-top: clamp(88px, 12vh, 108px);
   }
 
   .hero__title {
@@ -481,8 +625,10 @@
     width: 100%;
   }
 
-  .hm__img {
-    object-position: 82% bottom;
+  /* The ghost frames fan outward; at the narrowest widths that overhang is
+     what would push the section into a horizontal scroll. */
+  .ba {
+    width: min(100%, 300px);
   }
 }
 
@@ -494,4 +640,12 @@
   .mbtn--solid::after {
     display: none;
   }
+
+  /* The showcase stops cycling in JS; this stops the fade with it, so the
+     first case simply sits there. */
+  .ba__shot {
+    transition: none;
+    transform: none;
+  }
+
 }

@@ -7,27 +7,39 @@ import Icon from './Icon'
 
 const TOTAL = RESULTS.length
 const PANEL_ID = 'rr-panel'
+const STACKED = '(max-width: 1080px)'
 
-/** 0 → "01". The case index is set in serif numerals, so it needs the zero. */
+/** 0 → "01". The case index is set in display numerals, so it needs the zero. */
 const pad = (n) => String(n + 1).padStart(2, '0')
 
 /**
- * A curated case viewer rather than a conveyor of cards: one photograph held
- * large, with the six cases listed beside it as an index. The active row opens
- * to show its outcome and runs a timing bar; when that bar finishes it hands
- * over to the next case. Hovering or focusing the stage pauses the bar, so
- * reading a case never gets interrupted.
+ * A curated case viewer rather than a conveyor of cards.
+ *
+ * The print moves rather than duplicating: on desktop it sits beside the index
+ * as its own column; stacked, the very same element is rendered inside the open
+ * card, so tapping a case opens its photograph in place. One instance either
+ * way — a CSS-hidden second copy would download every image twice and put two
+ * elements on the page carrying the same id.
+ *
+ * The open card also runs a timing bar; when it finishes it hands over to the
+ * next case. Hovering or focusing the stage pauses that, so reading a case is
+ * never interrupted.
  */
 export default function Results() {
   const ref = useReveal()
   const reduced = usePrefersReducedMotion()
   const stageRef = useRef(null)
-  const tabsRef = useRef([])
+  const rowsRef = useRef([])
 
   const [active, setActive] = useState(0)
   /* Autoplay only runs when the stage is both on screen and unattended. */
   const [onScreen, setOnScreen] = useState(false)
   const [held, setHeld] = useState(false)
+  /* Drives where the print is rendered, so it has to be state rather than a
+     media query read at paint time. Seeded from the query itself so the first
+     render already places the print correctly — starting false and correcting
+     in an effect would mount it beside the list and immediately move it. */
+  const [stacked, setStacked] = useState(() => window.matchMedia(STACKED).matches)
 
   useEffect(() => {
     const el = stageRef.current
@@ -43,18 +55,31 @@ export default function Results() {
     return () => observer.disconnect()
   }, [])
 
-  const go = useCallback((next, focus) => {
-    const i = (next + TOTAL) % TOTAL
-    setActive(i)
-    if (focus) tabsRef.current[i]?.focus()
+  useEffect(() => {
+    const mq = window.matchMedia(STACKED)
+    const onChange = (e) => setStacked(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  /* Roving arrow keys across the index, per the tablist pattern. */
+  /** Wrapping index change with no side effects — the autoplay path. */
+  const step = useCallback((next) => setActive((next + TOTAL) % TOTAL), [])
+
+  /** The user path: same change, plus moving focus to the row that opened. */
+  const go = useCallback(
+    (next, focus) => {
+      const i = (next + TOTAL) % TOTAL
+      step(i)
+      if (focus) rowsRef.current[i]?.focus()
+    },
+    [step],
+  )
+
   const onKeyDown = (event) => {
-    const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[event.key]
-    if (step) {
+    const dir = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[event.key]
+    if (dir) {
       event.preventDefault()
-      go(active + step, true)
+      go(active + dir, true)
       return
     }
     if (event.key === 'Home' || event.key === 'End') {
@@ -64,6 +89,34 @@ export default function Results() {
   }
 
   const current = RESULTS[active]
+
+  /* Built once and placed in one of two spots. Every case stays mounted and
+     stacked so a change is a cross-fade with no layout shift and no second
+     download when a case comes back around. */
+  const viewer = (
+    <div className="rr__viewer">
+      <div className="rr__plate" id={PANEL_ID}>
+        {RESULTS.map((item, i) => (
+          <img
+            key={item.src}
+            className={`rr__shot${i === active ? ' is-on' : ''}`}
+            src={item.src}
+            alt={`${item.caption} — ${item.treatment} result at our Chennai clinic`}
+            aria-hidden={i === active ? undefined : true}
+            loading="lazy"
+            decoding="async"
+          />
+        ))}
+
+        <span className="rr__stamp" aria-hidden="true">
+          Before <i>/</i> After
+        </span>
+      </div>
+
+      <span className="rr__edge rr__edge--tl" aria-hidden="true" />
+      <span className="rr__edge rr__edge--br" aria-hidden="true" />
+    </div>
+  )
 
   return (
     <section className="section section--cream rr" id="results" ref={ref}>
@@ -92,40 +145,14 @@ export default function Results() {
         </div>
 
         <div
-          className="rr__stage reveal"
+          className={`rr__stage reveal${stacked ? ' is-stacked' : ''}`}
           ref={stageRef}
           onMouseEnter={() => setHeld(true)}
           onMouseLeave={() => setHeld(false)}
           onFocus={() => setHeld(true)}
           onBlur={() => setHeld(false)}
         >
-          <div className="rr__viewer">
-            <div
-              className="rr__plate"
-              id={PANEL_ID}
-              role="tabpanel"
-              aria-labelledby={`rr-tab-${active}`}
-            >
-              {RESULTS.map((item, i) => (
-                <img
-                  key={item.src}
-                  className={`rr__shot${i === active ? ' is-on' : ''}`}
-                  src={item.src}
-                  alt={`${item.caption} — ${item.treatment} result at our Chennai clinic`}
-                  aria-hidden={i === active ? undefined : true}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ))}
-
-              <span className="rr__stamp" aria-hidden="true">
-                Before <i>/</i> After
-              </span>
-            </div>
-
-            <span className="rr__edge rr__edge--tl" aria-hidden="true" />
-            <span className="rr__edge rr__edge--br" aria-hidden="true" />
-          </div>
+          {!stacked && viewer}
 
           <div className="rr__index">
             <div className="rr__bar">
@@ -154,29 +181,25 @@ export default function Results() {
               </div>
             </div>
 
-            <ul
-              className="rr__list"
-              role="tablist"
-              aria-orientation="vertical"
-              aria-label="Patient cases"
-              onKeyDown={onKeyDown}
-            >
+            {/* A disclosure set, not a tablist: stacked, the panel lives inside
+                the open card, and a tabpanel nested in its own tablist would be
+                a broken relationship. `aria-expanded` describes both layouts
+                honestly. */}
+            <ul className="rr__list" aria-label="Patient cases" onKeyDown={onKeyDown}>
               {RESULTS.map((item, i) => {
                 const on = i === active
                 return (
-                  <li key={item.src}>
+                  <li key={item.src} className={on ? 'is-on' : undefined}>
                     <button
                       type="button"
-                      id={`rr-tab-${i}`}
+                      id={`rr-row-${i}`}
                       className={`rr__row${on ? ' is-on' : ''}`}
-                      role="tab"
-                      aria-selected={on}
+                      aria-expanded={on}
                       aria-controls={PANEL_ID}
-                      tabIndex={on ? 0 : -1}
                       ref={(node) => {
-                        tabsRef.current[i] = node
+                        rowsRef.current[i] = node
                       }}
-                      onClick={() => setActive(i)}
+                      onClick={() => step(i)}
                     >
                       <span className="rr__row-no" aria-hidden="true">
                         {pad(i)}
@@ -190,15 +213,15 @@ export default function Results() {
                           <span className="rr__row-inner">
                             <span className="rr__row-cap">{item.caption}</span>
 
-                            {/* Mounted on the active row only, so it restarts
-                                from zero on every change of case. With motion
-                                off it is never mounted at all — the index
-                                becomes a plain manual picker. */}
+                            {/* Mounted on the open row only, so it restarts from
+                                zero on every change of case. With motion off it
+                                is never mounted at all — the index becomes a
+                                plain manual picker. */}
                             {on && !reduced && (
                               <span className="rr__meter" aria-hidden="true">
                                 <i
                                   data-run={onScreen && !held ? 'true' : 'false'}
-                                  onAnimationEnd={() => go(active + 1)}
+                                  onAnimationEnd={() => step(active + 1)}
                                 />
                               </span>
                             )}
@@ -210,6 +233,10 @@ export default function Results() {
                         <Icon name="ArrowUpRight" size={15} />
                       </span>
                     </button>
+
+                    {/* Outside the button, inside the card — a photograph is not
+                        part of the control that opened it. */}
+                    {stacked && on && <div className="rr__inline">{viewer}</div>}
                   </li>
                 )
               })}

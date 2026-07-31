@@ -1,20 +1,35 @@
 import { scrollToBooking, useCall } from '../callStore'
-import { useScrolledPast } from '../hooks'
 import Icon from './Icon'
 
+/**
+ * Sticky mobile action bar.
+ *
+ * Present from the first frame rather than sliding in past a 520px scroll
+ * threshold: on a phone this is the page's primary pair of actions, and gating
+ * it left the top of the page — the part every visitor sees — with no visible
+ * way to call or book. Shown only below 760px, where the header has collapsed
+ * to a burger and no longer carries either action.
+ */
 export default function ActionBar() {
-  const visible = useScrolledPast(520)
   const { requestCall } = useCall()
 
   return (
-    /* `inert` while parked off-screen so the buttons stay out of the tab order. */
-    <div className={`action-bar${visible ? ' is-up' : ''}`} inert={!visible}>
-      <button type="button" className="action-bar__btn action-bar__btn--call" onClick={() => requestCall()}>
+    <div className="action-bar">
+      <button
+        type="button"
+        className="action-bar__btn action-bar__btn--call"
+        onClick={() => requestCall()}
+      >
         <Icon name="Phone" size={18} />
-        Call
+        Call Now
       </button>
-      <button type="button" className="action-bar__btn action-bar__btn--book" onClick={scrollToBooking}>
-        Book a Consultation
+
+      <button
+        type="button"
+        className="action-bar__btn action-bar__btn--book"
+        onClick={scrollToBooking}
+      >
+        Book an Appointment
       </button>
     </div>
   )

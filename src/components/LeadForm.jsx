@@ -1,18 +1,21 @@
 import { useState } from 'react'
-import { BRANCHES, CALL_TIMES } from '../data'
+import { BRANCHES } from '../data'
 import { normalizePhone, submitLead, validatePhone } from '../submitLead'
+import DatePicker from './DatePicker'
 import Icon from './Icon'
-import Select from './Select'
 
-const EMPTY = { name: '', phone: '', branch: '', time: '' }
+/* `date` is a YYYY-MM-DD string. It replaced a Morning/Afternoon/Evening
+   choice — a date is a commitment the clinic can actually schedule against,
+   where a time-of-day band still needed a call to pin down.
 
-/* Shaped once at module scope — the dropdown compares options by identity when
-   it scrolls the highlight into view, so it must not get a new array each render. */
-const BRANCH_OPTIONS = BRANCHES.map((b) => ({ value: b.name, label: `${b.name}, Chennai` }))
+   `city` is free text and sits alongside `branch`, which they are not a
+   substitute for: branch is which of the two clinics the patient will attend,
+   city is where they are travelling from. */
+const EMPTY = { name: '', phone: '', city: '', branch: '', date: '' }
 
 /**
- * The one enquiry form on the page. `variant="compact"` drops the call-time
- * field for the exit popup; `idPrefix` keeps input ids unique between instances.
+ * The one enquiry form on the page. `variant="compact"` drops the date field
+ * for the exit popup; `idPrefix` keeps input ids unique between instances.
  */
 export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLabel = 'Book Your Slot' }) {
   const compact = variant === 'compact'
@@ -33,8 +36,9 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
     const next = {}
     if (values.name.trim().length < 2) next.name = 'Please enter your name'
     if (!validatePhone(values.phone)) next.phone = 'Enter a valid 10-digit mobile number'
+    if (!compact && values.city.trim().length < 2) next.city = 'Please enter your city or area'
     if (!values.branch) next.branch = 'Please choose a branch'
-    if (!compact && !values.time) next.time = 'Pick a time that suits you'
+    if (!compact && !values.date) next.date = 'Pick a date that suits you'
     return next
   }
 
@@ -122,39 +126,71 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
         </label>
       </div>
 
-      <Select
-        id={`${idPrefix}-branch`}
-        label="Select Branch"
-        icon="MapPin"
-        placeholder="Choose your nearest clinic"
-        options={BRANCH_OPTIONS}
-        value={values.branch}
-        onChange={pick('branch')}
-        error={errors.branch}
-      />
+      {/* Booking form only. The popup is a fast callback request that has to
+          clear a phone viewport with the keyboard raised — the branch answers
+          the location question well enough there. */}
+      {!compact && (
+        <label className="field" htmlFor={`${idPrefix}-city`}>
+          <span className="field__label">City / Area</span>
+          <span className="field__wrap">
+            <Icon name="Navigation" size={17} />
+            <input
+              id={`${idPrefix}-city`}
+              name="city"
+              type="text"
+              autoComplete="address-level2"
+              placeholder="e.g. Velachery, Adyar, Tambaram"
+              value={values.city}
+              onChange={field('city')}
+              aria-invalid={Boolean(errors.city)}
+            />
+          </span>
+          {errors.city && <span className="field__error">{errors.city}</span>}
+        </label>
+      )}
+
+      {/* Two clinics — a dropdown would hide both behind a click to save no
+          space at all. As badges they are visible, comparable and one tap. */}
+      <fieldset className="field field--choice">
+        <legend className="field__label">
+          <Icon name="MapPin" size={15} />
+          Select Branch
+        </legend>
+
+        <div className="badges">
+          {BRANCHES.map((b) => (
+            <label key={b.id} className={`badge${values.branch === b.name ? ' is-on' : ''}`}>
+              <input
+                type="radio"
+                name={`${idPrefix}-branch`}
+                value={b.name}
+                checked={values.branch === b.name}
+                onChange={field('branch')}
+                aria-invalid={Boolean(errors.branch)}
+              />
+              <span className="badge__tick" aria-hidden="true">
+                <Icon name="Check" size={13} />
+              </span>
+              <span className="badge__text">
+                <strong>{b.name}</strong>
+                <small>Chennai</small>
+              </span>
+            </label>
+          ))}
+        </div>
+
+        {errors.branch && <span className="field__error">{errors.branch}</span>}
+      </fieldset>
 
       {!compact && (
-        <fieldset className="field field--choice">
-          <legend className="field__label">
-            <Icon name="Clock" size={15} />
-            Preferred Time to Call
-          </legend>
-          <div className="chips">
-            {CALL_TIMES.map((t) => (
-              <label key={t} className={`chip${values.time === t ? ' is-on' : ''}`}>
-                <input
-                  type="radio"
-                  name={`${idPrefix}-time`}
-                  value={t}
-                  checked={values.time === t}
-                  onChange={field('time')}
-                />
-                {t}
-              </label>
-            ))}
-          </div>
-          {errors.time && <span className="field__error">{errors.time}</span>}
-        </fieldset>
+        <DatePicker
+          id={`${idPrefix}-date`}
+          label="Preferred Appointment Date"
+          placeholder="Choose a date"
+          value={values.date}
+          onChange={pick('date')}
+          error={errors.date}
+        />
       )}
 
       <p className="form__note">

@@ -4,10 +4,10 @@ import Icon from './Icon'
 import LeadForm from './LeadForm'
 
 const SCROLL_TRIGGER = 0.55
-const TIME_TRIGGER_MS = 10000
+const TIME_TRIGGER_MS = 3000
 
 /**
- * Fires on whichever comes first: 10 seconds on the page, an exit-intent
+ * Fires on whichever comes first: 3 seconds on the page, an exit-intent
  * movement towards the browser chrome (desktop), or 55% scroll depth (touch,
  * where there is no exit intent to detect).
  *
@@ -75,8 +75,11 @@ export default function CallbackInvite() {
           <Icon name="PhoneCall" size={13} />
           Free Callback
         </span>
+        {/* Two lines, not three — and no longer "Before You Go", which only
+            ever fitted the exit-intent trigger and now reads as a non-sequitur
+            for the five-second and scroll-depth ones. */}
         <h3 id="invite-title">
-          Before You Go — Get a Callback From Our <span className="gold-text">Chennai Hair Specialist</span>
+          Get a Callback From Our <span className="gold-text">Chennai Hair Specialist</span>
         </h3>
         <p className="invite__sub">Takes 15 seconds. We&apos;ll call you back today.</p>
 

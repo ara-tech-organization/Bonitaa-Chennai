@@ -25,11 +25,4 @@ export const SUBHEAD = [
 ]
 
 export const LEDE =
-  "Hair fall, thinning, or bald patches don't have to be permanent. Get a treatment plan designed around your scalp, your hair type, and your goals — from experienced hair specialists across Chennai."
-
-/* Small strip closing the hero. */
-export const TRUST_STRIP = [
-  '4.8★ Google Rating',
-  '15+ Years of Excellence',
-  '35+ Branches Across Tamil Nadu',
-]
+  'Hair fall or thinning hair? Get expert diagnosis and personalized treatment from Advanced hair specialists.'

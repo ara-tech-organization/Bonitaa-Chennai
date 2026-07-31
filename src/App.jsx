@@ -9,7 +9,7 @@ import LazySection from './components/LazySection'
 import ActionBar from './components/ActionBar'
 import TrustBar from './components/TrustBar'
 import usePrefersReducedMotion from './hooks/usePrefersReducedMotion'
-import useSmoothScroll from './hooks/useSmoothScroll'
+import useSmoothScroll, { useCleanAnchors } from './hooks/useSmoothScroll'
 import './App.css'
 
 /* Everything from About down is below the fold on every viewport, so it ships
@@ -27,6 +27,8 @@ export default function App() {
   const reduced = usePrefersReducedMotion()
   // Momentum scrolling is a motion effect — off when the user opts out.
   useSmoothScroll(!reduced)
+  // Section links scroll without leaving a fragment behind in the URL.
+  useCleanAnchors()
 
   return (
     <CallProvider>

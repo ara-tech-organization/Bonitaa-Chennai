@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 import { scrollToBooking, useCall } from '../../callStore'
-import HeroMedia from './HeroMedia'
+import BeforeAfter from './BeforeAfter'
 import CTAButtons from './CTAButtons'
-import { EYEBROW, HEADLINE, LEDE, SUBHEAD, TRUST_STRIP } from './heroContent'
+import { EYEBROW, HEADLINE, LEDE, SUBHEAD } from './heroContent'
 import './hero.css'
 
 const ease = [0.22, 1, 0.36, 1]
@@ -14,10 +14,9 @@ export default function Hero() {
      then hold — nothing in this section moves as the page scrolls. */
   return (
     <section className="hero" id="top">
-      <div className="hero__bg">
-        <HeroMedia />
-      </div>
-
+      {/* The hero's picture is the before/after frame in the second column —
+          there is no full-bleed artwork behind it, just the dark ground and
+          two blurred gold blooms drawn in CSS. */}
       <div className="hero__grid">
         {/* Copy sits in the white space the artwork already reserves. */}
         <div className="hero__copy">
@@ -82,18 +81,16 @@ export default function Hero() {
                 the call confirmation modal, which then opens the tel: link. */}
             <CTAButtons onCall={() => requestCall()} onBook={scrollToBooking} />
           </motion.div>
-
-          <motion.ul
-            className="hero__strip"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-          >
-            {TRUST_STRIP.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </motion.ul>
         </div>
+
+        <motion.div
+          className="hero__showcase"
+          initial={{ opacity: 0, x: 38 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.9, delay: 0.3, ease }}
+        >
+          <BeforeAfter />
+        </motion.div>
       </div>
     </section>
   )

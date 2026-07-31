@@ -33,8 +33,6 @@ export const BRANCHES = [
   },
 ]
 
-export const CALL_TIMES = ['Morning', 'Afternoon', 'Evening']
-
 /* Trust metrics — the only place branch count is stated as a number */
 export const TRUST_STATS = [
   { icon: 'CalendarCheck', value: '15+', label: 'Years of Excellence' },

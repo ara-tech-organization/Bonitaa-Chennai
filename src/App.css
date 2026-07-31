@@ -25,8 +25,11 @@
   position: fixed;
   inset: 0 0 auto;
   z-index: 90;
-  /* Light gold wash rather than plain white — keeps the bar tied to the logo. */
-  background: rgba(254, 250, 240, 0.82);
+  /* White, not the gold wash it used to carry: the logo is a PNG on a solid
+     white plate, and against a cream bar that plate showed as a pale rectangle
+     around the wordmark. Nearly opaque, because the hero beneath it is now
+     dark — at 0.84 the bar picked that up through the blur and turned grey. */
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   border-bottom: 1px solid transparent;
@@ -37,7 +40,7 @@
 }
 
 .hdr.is-stuck {
-  background: rgba(253, 247, 234, 0.94);
+  background: rgba(255, 255, 255, 0.95);
   border-bottom-color: var(--gold-200);
   box-shadow: 0 4px 26px -14px rgba(23, 18, 8, 0.22);
 }
@@ -196,19 +199,27 @@
   background: rgba(23, 18, 8, 0.34);
   backdrop-filter: blur(3px);
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s var(--ease-soft);
+  /* Hidden, not merely transparent: at opacity 0 the links stayed in the tab
+     order and focus could land inside a menu nobody could see. */
+  visibility: hidden;
+  transition:
+    opacity 0.35s var(--ease-soft),
+    visibility 0s linear 0.35s;
 }
 
 .drawer.is-open {
   opacity: 1;
-  pointer-events: auto;
+  visibility: visible;
+  transition-delay: 0s, 0s;
 }
 
 .drawer__panel {
   position: absolute;
   inset: 0 0 auto;
-  padding: 96px 24px 30px;
+  /* The panel covers the header rather than sitting under it, so it carries
+     its own top bar — the 96px of reserved space above was holding a gap open
+     for a burger the panel itself was hiding. */
+  padding: 16px 22px 26px;
   background: var(--white);
   border-radius: 0 0 var(--r-lg) var(--r-lg);
   box-shadow: var(--sh-lg);
@@ -217,6 +228,46 @@
   transition:
     transform 0.5s var(--ease),
     opacity 0.4s var(--ease-soft);
+}
+
+/* ---------- Panel top bar ---------- */
+
+.drawer__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 52px;
+  margin-bottom: 12px;
+}
+
+.drawer__logo {
+  height: 34px;
+  width: auto;
+}
+
+.drawer__close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--cream);
+  border: 1px solid var(--line);
+  transition:
+    color 0.3s var(--ease-soft),
+    background 0.35s var(--ease-soft),
+    border-color 0.35s var(--ease-soft),
+    transform 0.4s var(--ease);
+}
+
+.drawer__close:hover {
+  color: var(--gold-900);
+  background: var(--gold-050);
+  border-color: var(--gold-300);
+  transform: rotate(90deg);
 }
 
 .drawer.is-open .drawer__panel {
@@ -322,22 +373,18 @@
   color: var(--muted);
 }
 
+/* The gold bar is a background layer, not an overlaid strip, so the card does
+   not need `overflow: hidden` to keep it inside the rounded corners — and the
+   date picker's panel is therefore free to hang past the card's edge. */
 .booking__card {
   position: relative;
   padding: clamp(24px, 3.4vw, 40px);
-  background: var(--white);
+  background:
+    var(--grad-gold) top center / 100% 4px no-repeat,
+    var(--white);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   box-shadow: var(--sh-lg);
-  overflow: hidden;
-}
-
-.booking__card::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 4px;
-  background: var(--grad-gold);
 }
 
 .booking__card-top {
@@ -511,19 +558,19 @@
 }
 
 /* ==========================================================================
-   CUSTOM DROPDOWN
-   A native <select> will not take a border-radius, a gold ring or a panel
-   animation from CSS — its option list is drawn by the OS. This is the same
-   field frame with a listbox of our own beneath it.
+   PICKER — a field that opens a panel
+   Shared chrome for any control that reads as an input but reveals something
+   richer on click. The trigger borrows .field__wrap so it is the same box as
+   the text inputs above it; the panel below is `.pop`.
    ========================================================================== */
 
-.sel {
+.pick {
   position: relative;
 }
 
 /* The trigger wears .field__wrap, so it inherits the frame, the focus ring and
    the error state from the text inputs and can never drift away from them. */
-.sel__trigger {
+.pick__trigger {
   width: 100%;
   padding-block: 14px;
   text-align: left;
@@ -534,21 +581,21 @@
    satisfies for its own focus. This only adds the open state: focus has not
    moved, but the field is plainly the active one and must look it. The default
    focus outline is dropped because the ring below replaces it. */
-.sel.is-open .sel__trigger {
+.pick.is-open .pick__trigger {
   border-color: var(--gold-500);
   background: var(--white);
   box-shadow: 0 0 0 4px rgba(216, 174, 54, 0.14);
 }
 
-.sel__trigger:focus-visible {
+.pick__trigger:focus-visible {
   outline: none;
 }
 
-.sel.is-open .sel__trigger > svg:first-child {
+.pick.is-open .pick__trigger > svg:first-child {
   color: var(--gold-700);
 }
 
-.sel__value {
+.pick__value {
   flex: 1;
   min-width: 0;
   font-size: 0.95rem;
@@ -560,15 +607,15 @@
 }
 
 /* Matches the real placeholder colour on the text inputs beside it. */
-.sel__value.is-placeholder {
+.pick__value.is-placeholder {
   color: #a9a29a;
 }
 
-.sel__caret {
+.pick__caret {
   transition: transform 0.35s var(--ease);
 }
 
-.sel.is-open .sel__caret {
+.pick.is-open .pick__caret {
   transform: rotate(180deg);
   color: var(--gold-700);
 }
@@ -577,7 +624,7 @@
    Stays mounted so it can animate open and shut; `inert` on the closed state
    is what actually removes it from tab order and from the a11y tree. */
 
-.sel__panel {
+.pop {
   position: absolute;
   z-index: 40;
   top: calc(100% + 8px);
@@ -599,7 +646,7 @@
     visibility 0s linear 0.34s;
 }
 
-.sel.is-open .sel__panel {
+.pick.is-open .pop {
   opacity: 1;
   visibility: visible;
   transform: none;
@@ -607,58 +654,16 @@
   transition-delay: 0s, 0s, 0s;
 }
 
-.sel__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  max-height: 264px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+/* Opens upward when the field sits too close to the bottom of the viewport,
+   which is the norm for the last field in a form. */
+.pick.is-up .pop {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform-origin: bottom center;
+  transform: translateY(8px) scale(0.985);
 }
 
-.sel__option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 12px 12px 14px;
-  border-radius: var(--r-sm);
-  font-size: 0.93rem;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition:
-    background 0.22s var(--ease-soft),
-    color 0.22s var(--ease-soft);
-}
-
-/* One highlight, driven by both the pointer and the arrow keys — hover and
-   keyboard focus must never light two different rows at once. */
-.sel__option.is-active {
-  background: var(--gold-050);
-  color: var(--ink);
-}
-
-.sel__option.is-selected {
-  font-weight: 500;
-  color: var(--gold-900);
-}
-
-.sel__option-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.sel__tick {
-  flex: none;
-  color: var(--gold-600);
-  opacity: 0;
-  transform: scale(0.7);
-  transition:
-    opacity 0.25s var(--ease-soft),
-    transform 0.35s var(--ease);
-}
-
-.sel__option.is-selected .sel__tick {
-  opacity: 1;
+.pick.is-up.is-open .pop {
   transform: none;
 }
 
@@ -673,53 +678,280 @@
   display: block;
 }
 
-.chips {
+/* ==========================================================================
+   BRANCH BADGES
+   Two clinics. A dropdown would hide both behind a click and save nothing —
+   as badges they are visible side by side and selected in one tap. Native
+   radios do the state and keyboard work; the label is the whole target.
+   ========================================================================== */
+
+.badges {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.chip {
+.badge {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 13px 8px;
+  gap: 11px;
+  padding: 13px 14px;
   border: 1.5px solid var(--line);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-md);
   background: var(--cream);
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--ink-soft);
   cursor: pointer;
   transition:
     border-color 0.3s var(--ease-soft),
     background 0.3s var(--ease-soft),
-    color 0.3s var(--ease-soft),
-    transform 0.3s var(--ease);
+    box-shadow 0.35s var(--ease-soft),
+    transform 0.35s var(--ease);
 }
 
-.chip input {
+/* The real radio, covering the label — it keeps native keyboard and form
+   semantics while the styling lives entirely on the label around it. */
+.badge input {
   position: absolute;
-  opacity: 0;
   inset: 0;
+  opacity: 0;
   cursor: pointer;
 }
 
-.chip:hover {
+.badge:hover {
   border-color: var(--gold-300);
+  background: var(--gold-050);
 }
 
-.chip.is-on {
+.badge.is-on {
   border-color: var(--gold-500);
-  background: var(--gold-100);
-  color: var(--gold-900);
+  background: linear-gradient(120deg, var(--white), var(--gold-050) 60%, var(--gold-100));
+  box-shadow: 0 14px 30px -24px rgba(23, 18, 8, 0.5);
   transform: translateY(-1px);
 }
 
-.chip:has(input:focus-visible) {
+.badge:has(input:focus-visible) {
   outline: 2px solid var(--gold-600);
   outline-offset: 2px;
+}
+
+/* Always present, so choosing a branch never changes the badge's width. */
+.badge__tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: transparent;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  transition:
+    color 0.25s var(--ease-soft),
+    background 0.3s var(--ease-soft),
+    box-shadow 0.3s var(--ease-soft);
+}
+
+.badge.is-on .badge__tick {
+  color: var(--cta-ink);
+  background: var(--grad-cta);
+  background-size: 200% 100%;
+  box-shadow: 0 4px 10px -4px rgba(166, 124, 26, 0.7);
+}
+
+.badge__text {
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.badge__text strong {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.badge__text small {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.badge.is-on .badge__text strong {
+  color: var(--gold-900);
+}
+
+/* ==========================================================================
+   CALENDAR — preferred appointment date
+   Lives inside a `.pop` panel opened from the field. Deliberately compact:
+   it hangs over the rest of the form, so every cell is sized to keep six
+   weeks plus the header inside a panel that does not dominate the page.
+   ========================================================================== */
+
+/* Width-capped, not stretched to the field. Square cells mean the panel's
+   height is a direct function of its width — left at the field's ~460px the
+   grid alone stood over 370px tall. At 320px the cells land near 42px, which
+   is still a comfortable tap target and keeps the whole panel under 300px. */
+.cal__pop {
+  right: auto;
+  width: min(320px, 100%);
+  padding: 12px 12px 10px;
+}
+
+/* The trailing glyph in the field. Not a button — the whole trigger opens the
+   panel — so it is a target the pointer can ignore. */
+.cal__open {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  /* Pulls back most of .field__wrap--select's 44px right padding, which is
+     sized for a bare caret rather than a tile. */
+  margin-right: -30px;
+  border-radius: var(--r-sm);
+  color: var(--gold-800);
+  background: var(--gold-100);
+  box-shadow: inset 0 0 0 1px var(--gold-200);
+  transition:
+    color 0.3s var(--ease-soft),
+    background 0.3s var(--ease-soft);
+}
+
+.cal-pick:hover .cal__open,
+.cal-pick.is-open .cal__open {
+  color: var(--cta-ink);
+  background: var(--gold-700);
+  box-shadow: inset 0 0 0 1px var(--gold-700);
+}
+
+.cal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.cal__month {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.cal__nav {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--gold-800);
+  background: var(--gold-050);
+  box-shadow: inset 0 0 0 1px var(--gold-200);
+  transition:
+    color 0.3s var(--ease-soft),
+    background 0.3s var(--ease-soft),
+    box-shadow 0.3s var(--ease-soft);
+}
+
+.cal__nav:first-child svg {
+  transform: rotate(180deg);
+}
+
+.cal__nav:hover:not(:disabled) {
+  color: var(--cta-ink);
+  background: var(--gold-700);
+  box-shadow: inset 0 0 0 1px var(--gold-700);
+}
+
+/* Kept in place at low contrast rather than hidden — a control that vanishes
+   at the edge of the booking window reads as a rendering fault. */
+.cal__nav:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.cal__heads,
+.cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.cal__heads {
+  margin-bottom: 4px;
+  text-align: center;
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.cal__day {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  font-size: 0.81rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  transition:
+    color 0.2s var(--ease-soft),
+    background 0.22s var(--ease-soft),
+    box-shadow 0.22s var(--ease-soft);
+}
+
+.cal__day:hover:not(:disabled) {
+  background: var(--gold-100);
+  color: var(--gold-900);
+}
+
+/* The leading and trailing days of adjacent months. Shown, so the weeks read
+   as continuous, but recessed so they never compete with the real month. */
+.cal__day.is-outside {
+  color: #c9c2b8;
+}
+
+.cal__day:disabled {
+  color: #d8d2c9;
+  cursor: not-allowed;
+}
+
+.cal__day.is-today:not(.is-on) {
+  box-shadow: inset 0 0 0 1.5px var(--gold-300);
+  color: var(--gold-900);
+}
+
+.cal__day.is-on {
+  color: var(--cta-ink);
+  background: var(--grad-cta);
+  background-size: 200% 100%;
+  box-shadow: 0 6px 14px -7px rgba(166, 124, 26, 0.85);
+}
+
+/* Wins over :hover and .is-outside — a chosen day stays chosen-looking even
+   when it belongs to the month either side. */
+.cal__day.is-on:hover,
+.cal__day.is-on.is-outside {
+  color: var(--cta-ink);
+  background: var(--grad-cta);
+}
+
+.cal__foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.cal__foot svg {
+  flex: none;
+  color: var(--gold-600);
 }
 
 .form__note {
@@ -1129,7 +1361,13 @@
 
 .rr__stage {
   display: grid;
-  grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
+  /* The viewer track has a real minimum. At `minmax(0, 430px)` an
+     over-constrained row shrank it all the way to zero — the photograph
+     vanished and only the absolutely-positioned corner brackets were left
+     floating above the index. A floor of 300px means the layout would rather
+     overflow than crush the image out of existence, and the stack below takes
+     over long before it ever gets there. */
+  grid-template-columns: minmax(300px, 430px) minmax(0, 1fr);
   gap: clamp(28px, 4.6vw, 72px);
   align-items: start;
 }
@@ -1156,6 +1394,10 @@
 .rr__plate {
   position: relative;
   z-index: 1;
+  /* Explicit, so the ratio always has a definite width to resolve against.
+     The plate has no intrinsic size of its own — if an ancestor ever sizes to
+     fit-content it collapses to nothing and takes the photograph with it. */
+  width: 100%;
   aspect-ratio: 970 / 1280;
   border-radius: 26px;
   overflow: hidden;
@@ -1543,22 +1785,54 @@
    RESULTS — responsive
    ========================================================================== */
 
+/* Stacks at the same width the header gives up its inline nav. Two columns
+   below this left the photograph too narrow to read as the subject of the
+   section — which is the one thing it has to be. */
 @media (max-width: 1080px) {
-  .rr__stage {
-    grid-template-columns: minmax(0, 370px) minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  /* Stacked, the print leads and the index reads beneath it. */
+  /* One column: the index is the whole stage, and the print is rendered inside
+     whichever card is open rather than beside the list. */
   .rr__stage {
     grid-template-columns: minmax(0, 1fr);
-    gap: clamp(26px, 4vw, 34px);
+    gap: clamp(22px, 3.4vw, 30px);
   }
 
-  .rr__viewer {
-    max-width: 400px;
+  /* The open card becomes a container for its own photograph, so the frame and
+     the fill belong to the card, not to the row button inside it. */
+  .rr__list li.is-on {
+    border-radius: 18px;
+    background: linear-gradient(104deg, var(--white), var(--gold-050) 62%, var(--gold-100));
+    box-shadow:
+      inset 0 0 0 1px var(--gold-200),
+      0 22px 46px -34px rgba(23, 18, 8, 0.42);
+  }
+
+  /* …and the button gives them up, or the two would sit one inside the other
+     as a doubled outline. */
+  .rr__row.is-on {
+    background: none;
+    box-shadow: none;
+  }
+
+  .rr__inline {
+    padding: 4px 16px 18px;
+  }
+
+  /* `width` here is load-bearing, not decoration. `.rr__plate` carries only an
+     `aspect-ratio` and no intrinsic width, so any ancestor that sizes to
+     fit-content collapses it to zero — which is exactly what happened when
+     this was a grid item with auto margins: the photograph vanished and left
+     the corner brackets, absolutely positioned at fixed sizes, stacked on top
+     of one another. An explicit width always gives the ratio something
+     definite to resolve against. */
+  .rr__inline .rr__viewer {
+    width: min(100%, 320px);
     margin-inline: auto;
+  }
+
+  /* The bloom belongs to a print standing alone on the page; inside a card it
+     only muddies the fill behind it. */
+  .rr__inline .rr__viewer::before {
+    display: none;
   }
 
   .rr__head {
@@ -1572,6 +1846,16 @@
 }
 
 @media (max-width: 560px) {
+  /* The card has less room to give at this width, and the brackets sit
+     outside the plate, so the print comes in a little further. */
+  .rr__inline {
+    padding: 4px 12px 16px;
+  }
+
+  .rr__inline .rr__viewer {
+    width: min(100%, 260px);
+  }
+
   .rr__seal {
     width: 100%;
   }
@@ -2077,6 +2361,9 @@
   font-size: clamp(0.98rem, 1.5vw, 1.1rem);
   font-weight: 600;
   color: var(--f-ink);
+  /* A phone number must never break across lines — squeezed into a narrow
+     column it wrapped into three stacked fragments inside a round pill. */
+  white-space: nowrap;
   transition:
     transform 0.35s var(--ease),
     background 0.35s var(--ease-soft),
@@ -2270,12 +2557,12 @@
   backdrop-filter: blur(14px);
   border-top: 1px solid var(--line);
   box-shadow: 0 -8px 30px -14px rgba(23, 18, 8, 0.24);
-  transform: translateY(110%);
-  transition: transform 0.5s var(--ease);
 }
 
-.action-bar.is-up {
-  transform: none;
+/* Long labels must shrink rather than overflow — "Book an Appointment" is a
+   wide string for a 34%/66% split on a small phone. */
+.action-bar__btn {
+  min-width: 0;
 }
 
 .action-bar__btn {
@@ -2290,16 +2577,18 @@
 }
 
 .action-bar__btn--call {
-  flex: 0 0 34%;
+  flex: 0 0 36%;
   color: var(--gold-900);
   background: var(--gold-100);
   border: 1.5px solid var(--gold-300);
+  white-space: nowrap;
 }
 
 .action-bar__btn--book {
   flex: 1;
-  color: #fffdf7;
-  background: linear-gradient(122deg, var(--gold-700), var(--gold-500));
+  color: var(--cta-ink);
+  background: var(--grad-cta);
+  background-size: 200% 100%;
   box-shadow: var(--sh-gold);
 }
 
@@ -2312,12 +2601,19 @@
   inset: 0;
   z-index: 100;
   display: grid;
-  place-items: center;
+  /* Start-aligned, not centred. A centred grid item taller than its container
+     overflows equally in both directions, and the top half — the heading and
+     the first field — becomes unreachable because a scroll container cannot
+     scroll above its start edge. The card's own `margin-block: auto` still
+     centres it whenever there is room to spare. */
+  align-items: start;
+  justify-items: center;
   padding: 20px;
   background: rgba(23, 18, 8, 0.5);
   backdrop-filter: blur(5px);
   animation: fade-in 0.3s var(--ease-soft) both;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 @keyframes fade-in {
@@ -2345,27 +2641,76 @@
 
 .invite {
   max-width: 460px;
-  padding: clamp(26px, 4vw, 38px);
+  padding: clamp(22px, 3.2vw, 30px);
   margin-block: auto;
-  overflow: hidden;
 }
 
-.invite::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 4px;
-  background: var(--grad-gold);
+/* ---------- Popup height ----------
+   This card has to clear a phone's viewport with the keyboard raised, so every
+   gap in it is tighter than the same component gets in the page body. The form
+   keeps its field sizes — only the space between things comes down. */
+
+.invite .eyebrow {
+  margin-bottom: 11px;
+  padding-block: 5px;
+}
+
+.invite .form {
+  gap: 11px;
+}
+
+.invite .field__label {
+  margin-bottom: 5px;
+  font-size: 0.72rem;
+}
+
+/* Field height is the single biggest lever left: three of them at 14px block
+   padding is 24px more than three at 10px, and the inputs are still a
+   comfortable 44px tall. */
+.invite .field__wrap input {
+  padding-block: 11px;
+}
+
+.invite .badge {
+  padding: 10px 12px;
+}
+
+.invite .badge__tick {
+  width: 21px;
+  height: 21px;
+}
+
+.invite .form__note {
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+.invite .btn--lg {
+  padding-block: 14px;
+  font-size: 0.95rem;
+}
+
+/* The gold bar is a background layer on the card, not a strip laid over it.
+   The card used to clip an absolutely-positioned bar with `overflow: hidden`,
+   which it can no longer do — the branch dropdown has to be able to hang past
+   the card's edge. Rounding the bar itself did not work either: a 24px radius
+   on a 4px-tall box gets scaled down to almost nothing, so its square ends
+   overhung the curve. As a background layer it is clipped by the card's own
+   border-radius and follows the corners exactly. */
+.invite {
+  background:
+    var(--grad-gold) top center / 100% 4px no-repeat,
+    var(--white);
 }
 
 .invite h3 {
-  font-size: clamp(1.4rem, 2.8vw, 1.72rem);
-  line-height: 1.22;
+  font-size: clamp(1.18rem, 2.3vw, 1.4rem);
+  line-height: 1.25;
 }
 
 .invite__sub {
-  margin: 12px 0 24px;
-  font-size: 0.9rem;
+  margin: 8px 0 16px;
+  font-size: 0.86rem;
 }
 
 .invite__close,
@@ -2396,8 +2741,8 @@
 .invite__dismiss {
   display: block;
   width: 100%;
-  margin-top: 18px;
-  font-size: 0.85rem;
+  margin-top: 12px;
+  font-size: 0.82rem;
   color: var(--muted);
   transition: color 0.3s var(--ease-soft);
 }
@@ -2534,6 +2879,14 @@
     display: none;
   }
 
+  /* The nav is hidden but still in the DOM, so `.hdr__nav + .hdr__actions`
+     kept zeroing the auto margin that pushes the actions to the right edge —
+     the phone and burger bunched up beside the logo with the whole right half
+     of the bar left empty. Hand the margin back once the nav is gone. */
+  .hdr__nav + .hdr__actions {
+    margin-left: auto;
+  }
+
   .hdr__burger {
     display: grid;
     place-items: center;
@@ -2543,6 +2896,14 @@
     color: var(--ink);
     background: var(--cream);
     border: 1px solid var(--line);
+    transition:
+      background 0.3s var(--ease-soft),
+      border-color 0.3s var(--ease-soft);
+  }
+
+  .hdr__burger:hover {
+    background: var(--gold-050);
+    border-color: var(--gold-300);
   }
 
   .drawer {
@@ -2735,31 +3096,27 @@
     right: 14px;
   }
 
-  /* Phone collapses to just the ring icon; the number stays reachable via
-     the sticky action bar and the hero's own tel link. */
-  .hdr__cta,
-  .hdr__phone-num {
+  /* The Book CTA goes; the number stays. An unlabelled handset icon tells
+     nobody what it dials, and the phone number is the single most useful
+     thing a clinic header can carry on a phone — so the pill keeps its
+     number and gives up size instead. */
+  .hdr__cta {
     display: none;
   }
 
-  /* With the number hidden the pill would wrap a lone icon — drop back to the
-     bare ring. */
   .hdr__phone {
-    padding: 0;
-    border-color: transparent;
-    background: none;
-    box-shadow: none;
+    gap: 7px;
+    padding: 5px 12px 5px 5px;
   }
 
-  .hdr__phone:hover {
-    box-shadow: none;
-    background: none;
+  .hdr__phone-num {
+    font-size: 0.82rem;
   }
 
   .hdr__inner,
   .hdr.is-stuck .hdr__inner {
     height: 68px;
-    gap: 12px;
+    gap: 10px;
   }
 
   /* The hero owns its own spacing and breakpoints — see hero/hero.css. */
@@ -2787,16 +3144,50 @@
     width: 100%;
   }
 
+  /* One column, top to bottom. The tablet rule above pins brand and links to
+     `grid-row: 1`, and clearing only the column left them both still claiming
+     that row — grid then invented a second column to hold them, which is why
+     the brand text squeezed into a narrow strip with a void beside it. Every
+     placement has to be handed back, not just the column. */
   .ftr__top {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ftr__links {
+  .ftr__brand,
+  .ftr__links,
+  .ftr__branches {
     grid-column: auto;
+    grid-row: auto;
+  }
+
+  /* Quick links ahead of the clinics: two embedded maps otherwise push them
+     past the end of a very long scroll. */
+  .ftr__links {
+    order: 1;
+  }
+
+  .ftr__branches {
+    order: 2;
   }
 
   .ftr__links ul {
     grid-template-columns: repeat(2, auto);
+  }
+
+  /* Centred on phones, matching the legal line below. Full-width in a single
+     column, a left-ragged address block with its map thumbnail tucked under
+     the left edge reads as misaligned rather than as a column. Centring the
+     whole branch — heading, lines and map — gives it an axis to sit on. */
+  .ftr__branch {
+    text-align: center;
+  }
+
+  .ftr__branch strong {
+    justify-content: center;
+  }
+
+  .ftr__branch-map {
+    margin-inline: auto;
   }
 
   .ftr__legal {
@@ -2868,6 +3259,12 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Two badges side by side leave the clinic name wrapping mid-word at this
+     width — one per row keeps each on a single line. */
+  .badges {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .services__grid,
   .why__grid {
     grid-template-columns: minmax(0, 1fr);
@@ -2927,19 +3324,86 @@
     font-size: 1.8rem;
   }
 
+  /* xs — the card takes the width it is given. The overlay's 20px gutter is
+     the only margin left, so nothing about the form has room to breathe
+     sideways and the savings have to come out of the vertical spacing. */
   .invite,
   .call {
     max-width: none;
   }
 
+  .invite {
+    padding: 20px 18px 22px;
+  }
+
+  /* Clears the close button in its corner. */
   .invite h3 {
-    padding-right: 26px;
+    padding-right: 40px;
+    font-size: 1.14rem;
+  }
+
+  .invite .eyebrow {
+    margin-bottom: 11px;
+  }
+
+  .invite__sub {
+    margin: 7px 0 14px;
+  }
+
+  .invite .form {
+    gap: 11px;
+  }
+
+  .invite__dismiss {
+    margin-top: 12px;
+  }
+
+  .overlay {
+    padding: 14px;
   }
 }
 
 @media (max-width: 400px) {
-  .chips {
-    grid-template-columns: minmax(0, 1fr);
+  /* Genuinely out of room: logo, an 11-character number and a burger will not
+     share this width. The number drops to the bare ring here, and stays one
+     tap away in the sticky bar at the bottom of the screen. */
+  .hdr__phone-num {
+    display: none;
+  }
+
+  .hdr__phone {
+    padding: 0;
+    border-color: transparent;
+    background: none;
+    box-shadow: none;
+  }
+
+  .hdr__phone:hover {
+    background: none;
+    box-shadow: none;
+  }
+
+  .hdr__phone-ring {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Smallest phones — the popup gives up its last margin and the headline
+     drops to two lines so the submit button stays above the fold. */
+  .overlay {
+    padding: 10px;
+  }
+
+  .invite {
+    padding: 18px 15px 20px;
+  }
+
+  .invite h3 {
+    font-size: 1.06rem;
+  }
+
+  .invite__sub {
+    font-size: 0.82rem;
   }
 
   .hdr__logo img {
