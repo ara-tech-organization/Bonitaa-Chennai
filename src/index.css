@@ -86,11 +86,16 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Poppins carries UI and body copy; Cormorant Garamond — the hero's face —
-     now carries every heading on the page. Only 300/400/500 are loaded, so
-     headings must never ask for 600+ or the browser fakes the bold. */
+  /* One face across the whole page — Poppins carries body copy, UI and every
+     heading. `--font-display` is kept as an alias rather than deleted, so the
+     call sites that mean "this is display type" still read as such and can be
+     repointed in one place if a second face is ever reintroduced.
+     300–700 are loaded, so headings may ask for 600 without a faked bold. No
+     italic axis is requested, because nothing on the page is set in italic —
+     so nothing may set `font-style: italic`, or the browser will synthesize a
+     slant that overhangs its inline box and gets clipped by a masked reveal. */
   --font: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-display: var(--font);
 
   color-scheme: light;
 }
@@ -157,33 +162,35 @@ a {
   text-decoration: none;
 }
 
-/* Cormorant has a small x-height and low stroke weight next to Poppins, so
-   every heading is set larger, lighter and tighter than the sans equivalent
-   would be — otherwise it reads as an accident rather than a choice. */
+/* Poppins has a large x-height and wide, geometric letterforms — the opposite
+   of the serif this scale was first cut for. Every heading therefore drops in
+   size, gains weight and tightens its tracking: a geometric sans set large and
+   loose reads as a system font, and set light it disappears. Negative tracking
+   is what makes it read as display type rather than large body copy. */
 h1,
 h2,
 h3,
 h4 {
   color: var(--ink);
   font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: -0.028em;
   text-wrap: balance;
 }
 
 h1 {
-  font-size: clamp(2.7rem, 6.6vw, 4.7rem);
-  font-weight: 400;
+  font-size: clamp(2.15rem, 5.1vw, 3.5rem);
+  letter-spacing: -0.035em;
 }
 
 h2 {
-  font-size: clamp(2.1rem, 4.8vw, 3.3rem);
-  font-weight: 400;
+  font-size: clamp(1.66rem, 3.5vw, 2.4rem);
 }
 
 h3 {
-  font-size: clamp(1.24rem, 1.9vw, 1.46rem);
+  font-size: clamp(1.1rem, 1.6vw, 1.26rem);
+  letter-spacing: -0.02em;
 }
 
 p {

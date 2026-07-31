@@ -693,12 +693,13 @@
   background: var(--gold-100);
 }
 
-/* Display numerals follow the headings onto the serif. */
+/* Display numerals are set like the headings: weighted and tightly tracked,
+   which is what separates a figure from a large piece of body copy. */
 .trust__value {
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 2.8vw, 2.05rem);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.5rem, 2.6vw, 1.95rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
   /* Deep gradient, not --grad-gold: these are the page's headline figures and
      the pale midpoint left them barely readable against the cream. */
   background: var(--grad-gold-deep);
@@ -916,15 +917,15 @@
   margin-bottom: clamp(34px, 4.6vw, 58px);
 }
 
-/* Measured in px, not ch — `ch` resolves against the block's own Poppins,
-   which is far narrower than the Cormorant the heading is set in, and the
-   headline broke to three lines inside a column that looked half empty. */
+/* Measured in px rather than ch, because the cap has to hold the heading and
+   the lede at once and those two run at very different sizes — a ch value
+   resolves against this block's own body size and left the headline breaking
+   to three lines in a column that looked half empty. */
 .rr__head > div {
   max-width: 620px;
 }
 
 .rr__head h2 {
-  font-size: clamp(1.95rem, 3.7vw, 2.9rem);
   /* Two lines by design: the clinic's claim, then who it is about. */
   text-wrap: balance;
 }
@@ -1120,8 +1121,9 @@
 }
 
 .rr__count-now {
-  font-size: clamp(2.2rem, 3.4vw, 2.9rem);
-  font-weight: 500;
+  font-size: clamp(1.95rem, 3vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
   background: var(--grad-gold);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1131,7 +1133,8 @@
 }
 
 .rr__count-all {
-  font-size: 1.15rem;
+  font-size: 1rem;
+  font-weight: 500;
   color: var(--champ-500);
   font-variant-numeric: tabular-nums;
 }
@@ -1226,9 +1229,10 @@
 
 .rr__row-no {
   font-family: var(--font-display);
-  font-size: 1.12rem;
-  font-weight: 500;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.9;
   color: var(--champ-400);
   font-variant-numeric: tabular-nums;
   transition: color 0.4s var(--ease-soft);
@@ -1376,6 +1380,17 @@
   flex: none;
   margin-top: 2px;
   color: var(--gold-600);
+}
+
+/* The foot's own rule already closes the section, so the end mark sits close
+   under it rather than floating in a field of cream — and the section's bottom
+   padding is trimmed to match, since the rule is the visual full stop. */
+.rr {
+  padding-bottom: clamp(40px, 5vw, 64px);
+}
+
+.rr .section-end {
+  margin-top: clamp(18px, 2.2vw, 26px);
 }
 
 /* ==========================================================================
@@ -1647,10 +1662,10 @@
 
 .score__value {
   font-family: var(--font-display);
-  font-size: 3.4rem;
-  font-weight: 500;
+  font-size: 3rem;
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.035em;
   background: var(--grad-gold);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1934,8 +1949,9 @@
   border-color: var(--gold-300);
 }
 
-/* Stays on the sans — a 0.78rem uppercase label at 0.14em tracking is a UI
-   label, not display type, and Cormorant has no 600 to give it. */
+/* Named explicitly rather than inherited: a 0.78rem uppercase label at 0.14em
+   tracking is UI, not display type, and it must not follow if a second face is
+   ever reintroduced for headings. */
 .ftr__h {
   margin-bottom: 20px;
   font-family: var(--font);

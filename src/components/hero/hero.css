@@ -4,8 +4,9 @@
    ========================================================================== */
 
 .hero {
-  /* Local alias; the stack itself is the page-wide display face. */
-  --serif: var(--font-display);
+  /* Local alias; the stack itself is the page-wide display face — Poppins,
+     the same family the body copy is set in. */
+  --display: var(--font-display);
   /* Sampled from Hero.png's own empty region, so the artwork's edges melt
      into the section instead of showing a seam where it ends. */
   --paper: #fefefe;
@@ -143,13 +144,19 @@
 
 .hero__title {
   margin: 0;
-  font-family: var(--serif);
-  font-weight: 300;
-  /* Sized so "Chennai's Trusted" holds one line in this column, and so the
-     copy has enough presence to balance the artwork opposite it. */
-  font-size: clamp(2.1rem, 3.9vw, 4.5rem);
-  line-height: 1.04;
-  letter-spacing: -0.02em;
+  font-family: var(--display);
+  font-weight: 500;
+  /* Sized so "Chennai's Trusted" holds one line in this column. Poppins is
+     considerably wider per character than the serif this was first cut for,
+     so the ceiling drops accordingly — at the old 4.5rem the longest line
+     overran the column and the reveal mask clipped it. */
+  font-size: clamp(1.85rem, 3.1vw, 3.5rem);
+  /* Three short lines want tight leading — at 1.14 they read as three separate
+     statements stacked up rather than one headline, and the gold line floated
+     loose in the middle of the gap. Poppins' large x-height carries the
+     legibility, so the lines can close right up. */
+  line-height: 1.07;
+  letter-spacing: -0.035em;
   color: var(--ink);
 }
 
@@ -158,6 +165,10 @@
   /* Clips the rise so each line emerges from behind the one above. */
   overflow: hidden;
   padding-bottom: 0.05em;
+  /* A hair of end padding, pulled back out of the layout: the mask would
+     otherwise shave the side bearing off the last letter of a line. */
+  padding-inline-end: 0.06em;
+  margin-inline-end: -0.06em;
 }
 
 .hero__line-inner {
@@ -169,8 +180,11 @@
   margin-left: 0.22em;
 }
 
+/* Upright. The gold gradient and the extra weight carry the emphasis on their
+   own — Poppins is a geometric sans, and slanting it reads as a wobble in an
+   otherwise very level line rather than as stress. */
 .hero__word.is-accent {
-  font-style: italic;
+  font-weight: 600;
   background: linear-gradient(104deg, var(--champ-700), var(--gold-600) 48%, var(--champ-600));
   -webkit-background-clip: text;
   background-clip: text;
@@ -222,7 +236,10 @@
 }
 
 .hero__lede {
-  max-width: 46ch;
+  /* Wide enough to hold this paragraph in three lines rather than four —
+     Poppins runs narrower per ch than the cap implies, and the fourth line
+     carried only a few words. */
+  max-width: 54ch;
   margin-top: clamp(12px, 1.5vw, 17px);
   font-size: clamp(0.92rem, 0.95vw, 1rem);
   line-height: 1.7;
@@ -447,7 +464,7 @@
   }
 
   .hero__title {
-    font-size: clamp(1.95rem, 8.4vw, 2.5rem);
+    font-size: clamp(1.72rem, 7.6vw, 2.3rem);
   }
 
   /* Below this the pair genuinely cannot share a line. */
