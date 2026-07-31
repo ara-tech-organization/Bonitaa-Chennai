@@ -525,17 +525,12 @@ html {
   }
 }
 
-/* The case print eases out of a slight push-in behind its own frame. */
-.rr__stage.is-in .rr__shot.is-on {
-  animation: reveal-zoom 1.3s var(--ease) 120ms backwards;
-}
-
-@keyframes reveal-zoom {
-  from {
-    opacity: 0;
-    transform: scale(1.1);
-  }
-}
+/* The case print used to ease out of a push-in keyed off `.rr__stage.is-in`.
+   The stage is no longer a `.reveal` — parking the section's entire content at
+   opacity 0 behind an observer meant a single miss rendered Real Results as an
+   empty band — so that hook is gone, and with it the entrance. `.rr__shot`
+   carries its own opacity and scale transition, which is what actually does
+   the work on every change of case. */
 
 /* ---------- Heading cascade ----------
    A heading block is a single observer target, but its parts arrive on their

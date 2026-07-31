@@ -13,32 +13,32 @@ const STACKED = '(max-width: 1080px)'
 const pad = (n) => String(n + 1).padStart(2, '0')
 
 /**
- * A curated case viewer rather than a conveyor of cards.
+ * Two genuinely different compositions rather than one squeezed to fit.
  *
- * The print moves rather than duplicating: on desktop it sits beside the index
- * as its own column; stacked, the very same element is rendered inside the open
- * card, so tapping a case opens its photograph in place. One instance either
- * way — a CSS-hidden second copy would download every image twice and put two
- * elements on the page carrying the same id.
+ * Desktop is a curated case viewer: one print held large beside an index of the
+ * six, the open row running a timing bar that hands over to the next case.
  *
- * The open card also runs a timing bar; when it finishes it hands over to the
- * next case. Hovering or focusing the stage pauses that, so reading a case is
- * never interrupted.
+ * Below 1080px that becomes a swipeable slider — one case per screen, driven by
+ * the thumb. An index of six rows plus a photograph is a lot of vertical travel
+ * on a phone, and a list is a poor way to browse pictures when a swipe is the
+ * natural gesture. The slider is a real scroll container with scroll-snap, so
+ * swiping, momentum and keyboard scrolling are the browser's own.
  */
 export default function Results() {
   const ref = useReveal()
   const reduced = usePrefersReducedMotion()
   const stageRef = useRef(null)
   const rowsRef = useRef([])
+  const trackRef = useRef(null)
+  const frame = useRef(0)
 
   const [active, setActive] = useState(0)
   /* Autoplay only runs when the stage is both on screen and unattended. */
   const [onScreen, setOnScreen] = useState(false)
   const [held, setHeld] = useState(false)
-  /* Drives where the print is rendered, so it has to be state rather than a
-     media query read at paint time. Seeded from the query itself so the first
-     render already places the print correctly — starting false and correcting
-     in an effect would mount it beside the list and immediately move it. */
+  /* Drives which composition renders, so it has to be state. Seeded from the
+     query itself — starting false would build the desktop layout first and
+     immediately tear it down. */
   const [stacked, setStacked] = useState(() => window.matchMedia(STACKED).matches)
 
   useEffect(() => {
@@ -62,10 +62,42 @@ export default function Results() {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
+  useEffect(() => () => cancelAnimationFrame(frame.current), [])
+
   /** Wrapping index change with no side effects — the autoplay path. */
   const step = useCallback((next) => setActive((next + TOTAL) % TOTAL), [])
 
-  /** The user path: same change, plus moving focus to the row that opened. */
+  /** One slide's worth of travel, measured off the DOM rather than assumed. */
+  const slideWidth = () => {
+    const track = trackRef.current
+    const card = track?.firstElementChild
+    if (!card) return 0
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0
+    return card.getBoundingClientRect().width + gap
+  }
+
+  /** Moves the slider; `active` follows from the scroll handler, not from here. */
+  const slideTo = useCallback((next) => {
+    const track = trackRef.current
+    if (!track) return
+    const i = (next + TOTAL) % TOTAL
+    track.scrollTo({ left: i * slideWidth(), behavior: reduced ? 'auto' : 'smooth' })
+  }, [reduced])
+
+  /* The scroll position is the source of truth while swiping — reading it back
+     is what keeps the counter and dots honest mid-gesture. */
+  const onTrackScroll = () => {
+    cancelAnimationFrame(frame.current)
+    frame.current = requestAnimationFrame(() => {
+      const track = trackRef.current
+      const w = slideWidth()
+      if (!track || !w) return
+      const i = Math.round(track.scrollLeft / w)
+      setActive(Math.max(0, Math.min(TOTAL - 1, i)))
+    })
+  }
+
+  /** The user path on desktop: change case, and move focus to its row. */
   const go = useCallback(
     (next, focus) => {
       const i = (next + TOTAL) % TOTAL
@@ -89,32 +121,33 @@ export default function Results() {
   }
 
   const current = RESULTS[active]
+  const move = stacked ? slideTo : go
 
-  /* Built once and placed in one of two spots. Every case stays mounted and
-     stacked so a change is a cross-fade with no layout shift and no second
-     download when a case comes back around. */
-  const viewer = (
-    <div className="rr__viewer">
-      <div className="rr__plate" id={PANEL_ID}>
-        {RESULTS.map((item, i) => (
-          <img
-            key={item.src}
-            className={`rr__shot${i === active ? ' is-on' : ''}`}
-            src={item.src}
-            alt={`${item.caption} — ${item.treatment} result at our Chennai clinic`}
-            aria-hidden={i === active ? undefined : true}
-            loading="lazy"
-            decoding="async"
-          />
-        ))}
+  const counter = (
+    <div className="rr__bar">
+      <p className="rr__count">
+        <span className="rr__count-now">{pad(active)}</span>
+        <span className="rr__count-all">/ {pad(TOTAL - 1)}</span>
+      </p>
 
-        <span className="rr__stamp" aria-hidden="true">
-          Before <i>/</i> After
-        </span>
+      <div className="rr__nav">
+        <button
+          type="button"
+          className="rr__step"
+          onClick={() => move(active - 1)}
+          aria-label="Previous case"
+        >
+          <Icon name="ArrowRight" size={16} />
+        </button>
+        <button
+          type="button"
+          className="rr__step"
+          onClick={() => move(active + 1)}
+          aria-label="Next case"
+        >
+          <Icon name="ArrowRight" size={16} />
+        </button>
       </div>
-
-      <span className="rr__edge rr__edge--tl" aria-hidden="true" />
-      <span className="rr__edge rr__edge--br" aria-hidden="true" />
     </div>
   )
 
@@ -144,104 +177,159 @@ export default function Results() {
           </div>
         </div>
 
+        {/* Deliberately not a `.reveal`. That class parks an element at
+            opacity 0 until an IntersectionObserver adds `.is-in`, which is
+            fine for a heading but not for the section's entire content: any
+            miss — a direct jump to #results, a lazy mount that lands already
+            past the threshold — leaves the whole section blank with no way to
+            recover. The head and foot still animate; the cases just show. */}
         <div
-          className={`rr__stage reveal${stacked ? ' is-stacked' : ''}`}
+          className={`rr__stage${stacked ? ' is-slider' : ''}`}
           ref={stageRef}
           onMouseEnter={() => setHeld(true)}
           onMouseLeave={() => setHeld(false)}
           onFocus={() => setHeld(true)}
           onBlur={() => setHeld(false)}
         >
-          {!stacked && viewer}
+          {stacked ? (
+            <div className="rr__slider">
+              {counter}
 
-          <div className="rr__index">
-            <div className="rr__bar">
-              <p className="rr__count">
-                <span className="rr__count-now">{pad(active)}</span>
-                <span className="rr__count-all">/ {pad(TOTAL - 1)}</span>
-              </p>
+              <ul
+                className="rr__track"
+                ref={trackRef}
+                onScroll={onTrackScroll}
+                aria-label="Patient cases"
+              >
+                {RESULTS.map((item, i) => (
+                  <li className="rr__slide" key={item.src} aria-current={i === active || undefined}>
+                    <div className="rr__plate">
+                      {/* Its own class, not `.rr__shot.is-on` — a slide holds
+                          one image outright, where `.rr__shot` is built for
+                          the desktop stack where five of six are hidden. */}
+                      <img
+                        className="rr__slide-img"
+                        src={item.src}
+                        alt={`${item.caption} — ${item.treatment} result at our Chennai clinic`}
+                        /* Only the first slide is on screen at rest; the others
+                           arrive as the track is swiped. */
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                        decoding="async"
+                      />
+                      <span className="rr__stamp" aria-hidden="true">
+                        Before <i>/</i> After
+                      </span>
+                    </div>
 
-              <div className="rr__nav">
-                <button
-                  type="button"
-                  className="rr__step"
-                  onClick={() => go(active - 1)}
-                  aria-label="Previous case"
-                >
-                  <Icon name="ArrowRight" size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="rr__step"
-                  onClick={() => go(active + 1)}
-                  aria-label="Next case"
-                >
-                  <Icon name="ArrowRight" size={16} />
-                </button>
+                    <p className="rr__slide-cap">
+                      <span className="rr__row-treat">{item.treatment}</span>
+                      <strong>{item.caption}</strong>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="rr__dots">
+                {RESULTS.map((item, i) => (
+                  <button
+                    key={item.src}
+                    type="button"
+                    className={`rr__dot${i === active ? ' is-on' : ''}`}
+                    aria-label={`Case ${pad(i)}: ${item.treatment}`}
+                    aria-current={i === active || undefined}
+                    onClick={() => slideTo(i)}
+                  />
+                ))}
               </div>
             </div>
+          ) : (
+            <>
+              <div className="rr__viewer">
+                {/* Every case stays mounted and stacked, so a change is a
+                    cross-fade with no layout shift and no second download when
+                    a case comes back around. */}
+                <div className="rr__plate" id={PANEL_ID}>
+                  {RESULTS.map((item, i) => (
+                    <img
+                      key={item.src}
+                      className={`rr__shot${i === active ? ' is-on' : ''}`}
+                      src={item.src}
+                      alt={`${item.caption} — ${item.treatment} result at our Chennai clinic`}
+                      aria-hidden={i === active ? undefined : true}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ))}
 
-            {/* A disclosure set, not a tablist: stacked, the panel lives inside
-                the open card, and a tabpanel nested in its own tablist would be
-                a broken relationship. `aria-expanded` describes both layouts
-                honestly. */}
-            <ul className="rr__list" aria-label="Patient cases" onKeyDown={onKeyDown}>
-              {RESULTS.map((item, i) => {
-                const on = i === active
-                return (
-                  <li key={item.src} className={on ? 'is-on' : undefined}>
-                    <button
-                      type="button"
-                      id={`rr-row-${i}`}
-                      className={`rr__row${on ? ' is-on' : ''}`}
-                      aria-expanded={on}
-                      aria-controls={PANEL_ID}
-                      ref={(node) => {
-                        rowsRef.current[i] = node
-                      }}
-                      onClick={() => step(i)}
-                    >
-                      <span className="rr__row-no" aria-hidden="true">
-                        {pad(i)}
-                      </span>
+                  <span className="rr__stamp" aria-hidden="true">
+                    Before <i>/</i> After
+                  </span>
+                </div>
 
-                      <span className="rr__row-body">
-                        <span className="rr__row-treat">{item.treatment}</span>
+                <span className="rr__edge rr__edge--tl" aria-hidden="true" />
+                <span className="rr__edge rr__edge--br" aria-hidden="true" />
+              </div>
 
-                        {/* 0fr → 1fr, so the outcome unfolds instead of popping. */}
-                        <span className="rr__row-open">
-                          <span className="rr__row-inner">
-                            <span className="rr__row-cap">{item.caption}</span>
+              <div className="rr__index">
+                {counter}
 
-                            {/* Mounted on the open row only, so it restarts from
-                                zero on every change of case. With motion off it
-                                is never mounted at all — the index becomes a
-                                plain manual picker. */}
-                            {on && !reduced && (
-                              <span className="rr__meter" aria-hidden="true">
-                                <i
-                                  data-run={onScreen && !held ? 'true' : 'false'}
-                                  onAnimationEnd={() => step(active + 1)}
-                                />
-                              </span>
-                            )}
+                {/* A disclosure set, not a tablist — `aria-expanded` describes
+                    the one open case honestly. */}
+                <ul className="rr__list" aria-label="Patient cases" onKeyDown={onKeyDown}>
+                  {RESULTS.map((item, i) => {
+                    const on = i === active
+                    return (
+                      <li key={item.src} className={on ? 'is-on' : undefined}>
+                        <button
+                          type="button"
+                          id={`rr-row-${i}`}
+                          className={`rr__row${on ? ' is-on' : ''}`}
+                          aria-expanded={on}
+                          aria-controls={PANEL_ID}
+                          ref={(node) => {
+                            rowsRef.current[i] = node
+                          }}
+                          onClick={() => step(i)}
+                        >
+                          <span className="rr__row-no" aria-hidden="true">
+                            {pad(i)}
                           </span>
-                        </span>
-                      </span>
 
-                      <span className="rr__row-go" aria-hidden="true">
-                        <Icon name="ArrowUpRight" size={15} />
-                      </span>
-                    </button>
+                          <span className="rr__row-body">
+                            <span className="rr__row-treat">{item.treatment}</span>
 
-                    {/* Outside the button, inside the card — a photograph is not
-                        part of the control that opened it. */}
-                    {stacked && on && <div className="rr__inline">{viewer}</div>}
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+                            {/* 0fr → 1fr, so the outcome unfolds instead of
+                                popping. */}
+                            <span className="rr__row-open">
+                              <span className="rr__row-inner">
+                                <span className="rr__row-cap">{item.caption}</span>
+
+                                {/* Mounted on the open row only, so it restarts
+                                    from zero on every change of case. With
+                                    motion off it is never mounted at all. */}
+                                {on && !reduced && (
+                                  <span className="rr__meter" aria-hidden="true">
+                                    <i
+                                      data-run={onScreen && !held ? 'true' : 'false'}
+                                      onAnimationEnd={() => step(active + 1)}
+                                    />
+                                  </span>
+                                )}
+                              </span>
+                            </span>
+                          </span>
+
+                          <span className="rr__row-go" aria-hidden="true">
+                            <Icon name="ArrowUpRight" size={15} />
+                          </span>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="rr__foot reveal">
@@ -260,7 +348,7 @@ export default function Results() {
         <span className="section-end" aria-hidden="true" />
       </div>
 
-      {/* Announced separately — the plate itself is a photograph swap, and the
+      {/* Announced separately — the print itself is a photograph swap, and the
           caption is what actually changes for a screen reader. */}
       <span className="sr-only" aria-live="polite">
         Case {pad(active)} of {pad(TOTAL - 1)}: {current.caption}, {current.treatment}

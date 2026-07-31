@@ -10,7 +10,7 @@ import Icon from './Icon'
 
    `city` is free text and sits alongside `branch`, which they are not a
    substitute for: branch is which of the two clinics the patient will attend,
-   city is where they are travelling from. */
+   city is where they are travelling from. Both variants collect it. */
 const EMPTY = { name: '', phone: '', city: '', branch: '', date: '' }
 
 /**
@@ -36,7 +36,7 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
     const next = {}
     if (values.name.trim().length < 2) next.name = 'Please enter your name'
     if (!validatePhone(values.phone)) next.phone = 'Enter a valid 10-digit mobile number'
-    if (!compact && values.city.trim().length < 2) next.city = 'Please enter your city or area'
+    if (values.city.trim().length < 2) next.city = 'Please enter your city or area'
     if (!values.branch) next.branch = 'Please choose a branch'
     if (!compact && !values.date) next.date = 'Pick a date that suits you'
     return next
@@ -126,28 +126,25 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
         </label>
       </div>
 
-      {/* Booking form only. The popup is a fast callback request that has to
-          clear a phone viewport with the keyboard raised — the branch answers
-          the location question well enough there. */}
-      {!compact && (
-        <label className="field" htmlFor={`${idPrefix}-city`}>
-          <span className="field__label">City / Area</span>
-          <span className="field__wrap">
-            <Icon name="Navigation" size={17} />
-            <input
-              id={`${idPrefix}-city`}
-              name="city"
-              type="text"
-              autoComplete="address-level2"
-              placeholder="e.g. Velachery, Adyar, Tambaram"
-              value={values.city}
-              onChange={field('city')}
-              aria-invalid={Boolean(errors.city)}
-            />
-          </span>
-          {errors.city && <span className="field__error">{errors.city}</span>}
-        </label>
-      )}
+      <label className="field" htmlFor={`${idPrefix}-city`}>
+        <span className="field__label">City / Area</span>
+        <span className="field__wrap">
+          <Icon name="Navigation" size={17} />
+          <input
+            id={`${idPrefix}-city`}
+            name="city"
+            type="text"
+            /* Shorter prompt in the popup — three example areas overflow the
+               narrower field and truncate mid-word. */
+            placeholder={compact ? 'e.g. Velachery' : 'e.g. Velachery, Adyar, Tambaram'}
+            autoComplete="address-level2"
+            value={values.city}
+            onChange={field('city')}
+            aria-invalid={Boolean(errors.city)}
+          />
+        </span>
+        {errors.city && <span className="field__error">{errors.city}</span>}
+      </label>
 
       {/* Two clinics — a dropdown would hide both behind a click to save no
           space at all. As badges they are visible, comparable and one tap. */}

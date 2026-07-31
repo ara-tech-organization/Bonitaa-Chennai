@@ -1785,54 +1785,129 @@
    RESULTS — responsive
    ========================================================================== */
 
-/* Stacks at the same width the header gives up its inline nav. Two columns
-   below this left the photograph too narrow to read as the subject of the
-   section — which is the one thing it has to be. */
+/* Below the width the header gives up its inline nav, the section becomes a
+   swipeable slider instead of an index plus a print. Two columns leave the
+   photograph too narrow to be the subject of the section, and a six-row list
+   plus an image is a lot of vertical travel on a phone. */
 @media (max-width: 1080px) {
-  /* One column: the index is the whole stage, and the print is rendered inside
-     whichever card is open rather than beside the list. */
   .rr__stage {
     grid-template-columns: minmax(0, 1fr);
     gap: clamp(22px, 3.4vw, 30px);
   }
 
-  /* The open card becomes a container for its own photograph, so the frame and
-     the fill belong to the card, not to the row button inside it. */
-  .rr__list li.is-on {
-    border-radius: 18px;
-    background: linear-gradient(104deg, var(--white), var(--gold-050) 62%, var(--gold-100));
-    box-shadow:
-      inset 0 0 0 1px var(--gold-200),
-      0 22px 46px -34px rgba(23, 18, 8, 0.42);
+  /* Full-bleed out of the shell, so a slide can sit centred with the next one
+     showing at both edges — that peek is what says "swipe" without a label. */
+  .rr__slider {
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
   }
 
-  /* …and the button gives them up, or the two would sit one inside the other
-     as a doubled outline. */
-  .rr__row.is-on {
-    background: none;
-    box-shadow: none;
-  }
-
-  .rr__inline {
-    padding: 4px 16px 18px;
-  }
-
-  /* `width` here is load-bearing, not decoration. `.rr__plate` carries only an
-     `aspect-ratio` and no intrinsic width, so any ancestor that sizes to
-     fit-content collapses it to zero — which is exactly what happened when
-     this was a grid item with auto margins: the photograph vanished and left
-     the corner brackets, absolutely positioned at fixed sizes, stacked on top
-     of one another. An explicit width always gives the ratio something
-     definite to resolve against. */
-  .rr__inline .rr__viewer {
-    width: min(100%, 320px);
+  .rr__slider .rr__bar {
+    max-width: var(--shell);
     margin-inline: auto;
+    padding-inline: var(--gutter);
   }
 
-  /* The bloom belongs to a print standing alone on the page; inside a card it
-     only muddies the fill behind it. */
-  .rr__inline .rr__viewer::before {
+  .rr__track {
+    display: flex;
+    gap: clamp(12px, 3vw, 20px);
+    margin: 14px 0 0;
+    /* The side padding is what centres the first and last slides — without it
+       they snap flush to the viewport edge with nothing beside them. */
+    padding: 4px calc(50% - min(41vw, 190px)) 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    /* Driven by thumb, arrows and dots; a scrollbar under it adds nothing. */
+    scrollbar-width: none;
+  }
+
+  .rr__track::-webkit-scrollbar {
     display: none;
+  }
+
+  .rr__slide {
+    flex: 0 0 min(82vw, 380px);
+    scroll-snap-align: center;
+    /* Off-centre slides sit back, so the current case reads as the subject
+       rather than as one of three equals. */
+    opacity: 0.44;
+    transform: scale(0.94);
+    transition:
+      opacity 0.45s var(--ease-soft),
+      transform 0.55s var(--ease);
+  }
+
+  .rr__slide[aria-current] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .rr__slide .rr__plate {
+    border-radius: 22px;
+  }
+
+  /* `contain` keeps each before/after collage whole — the sources arrive at
+     two ratios and a crop would cut into the comparison itself. */
+  .rr__slide-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .rr__slide-cap {
+    display: grid;
+    gap: 3px;
+    margin-top: 14px;
+    text-align: center;
+  }
+
+  .rr__slide-cap strong {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  /* ---------- Dots ---------- */
+
+  .rr__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  /* The tap target is the button; the visible dot is drawn inside it, so the
+     row stays finger-friendly without a line of oversized dots. */
+  .rr__dot {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+  }
+
+  .rr__dot::before {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-full);
+    background: var(--champ-400);
+    transform: translate(-50%, -50%);
+    transition:
+      width 0.45s var(--ease),
+      background 0.35s var(--ease-soft);
+  }
+
+  .rr__dot.is-on::before {
+    width: 22px;
+    background: var(--grad-gold);
   }
 
   .rr__head {
@@ -1846,14 +1921,14 @@
 }
 
 @media (max-width: 560px) {
-  /* The card has less room to give at this width, and the brackets sit
-     outside the plate, so the print comes in a little further. */
-  .rr__inline {
-    padding: 4px 12px 16px;
+  /* A wider slide with a narrower peek — at 82vw the neighbours ate so much of
+     a phone screen that the current case stopped feeling like the subject. */
+  .rr__slide {
+    flex-basis: 86vw;
   }
 
-  .rr__inline .rr__viewer {
-    width: min(100%, 260px);
+  .rr__track {
+    padding-inline: calc(50% - 43vw);
   }
 
   .rr__seal {
