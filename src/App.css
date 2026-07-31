@@ -899,198 +899,547 @@
 }
 
 /* ==========================================================================
-   RESULTS — auto-scrolling marquee, looping 1→6→1→6
+   RESULTS — a case viewer, not a conveyor
+   One photograph held large beside an index of the six cases. The active row
+   opens to show its outcome and runs a timing bar; when the bar completes it
+   hands over to the next case. Everything gold lives in the frame, the rail
+   and the numerals — never on the photograph.
    ========================================================================== */
 
-.marquee {
-  --card: clamp(238px, 24vw, 310px);
-  --gap: 24px;
-  position: relative;
-  overflow: hidden;
-  padding-block: 10px;
-  /* Full-bleed out of the shell so cards run edge to edge. */
-  width: 100vw;
-  margin-left: 50%;
-  transform: translateX(-50%);
-}
+/* ---------- Head — asymmetric: copy left, provenance seal right ---------- */
 
-.marquee__track {
+.rr__head {
   display: flex;
-  gap: var(--gap);
-  width: max-content;
-  animation: marquee 46s linear infinite;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(24px, 4vw, 56px);
+  margin-bottom: clamp(34px, 4.6vw, 58px);
 }
 
-/* -50% lands mid-gap between the two passes; the extra half-gap puts card 01
-   of pass two exactly where card 01 of pass one started. */
-@keyframes marquee {
-  to {
-    transform: translateX(calc(-50% - var(--gap) / 2));
-  }
+/* Measured in px, not ch — `ch` resolves against the block's own Poppins,
+   which is far narrower than the Cormorant the heading is set in, and the
+   headline broke to three lines inside a column that looked half empty. */
+.rr__head > div {
+  max-width: 620px;
 }
 
-.marquee:hover .marquee__track,
-.marquee:focus-within .marquee__track {
-  animation-play-state: paused;
+.rr__head h2 {
+  font-size: clamp(1.95rem, 3.7vw, 2.9rem);
+  /* Two lines by design: the clinic's claim, then who it is about. */
+  text-wrap: balance;
 }
 
-/* Edges dissolve instead of cutting cards off hard. */
-.marquee__fade {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: clamp(40px, 8vw, 130px);
-  pointer-events: none;
-  z-index: 2;
+.rr__head p {
+  max-width: 48ch;
+  margin-top: 14px;
+  font-size: 1rem;
+  color: var(--body);
 }
 
-.marquee__fade--l {
-  left: 0;
-  background: linear-gradient(90deg, var(--cream), rgba(253, 250, 244, 0));
-}
-
-.marquee__fade--r {
-  right: 0;
-  background: linear-gradient(270deg, var(--cream), rgba(253, 250, 244, 0));
-}
-
-/* ---------- Card ----------
-   A framed print with a caption plate beneath it. No badges, no numerals,
-   nothing sitting on the photograph — the restraint is what makes it read as
-   premium. The gold lives in the ring, the divider and the eyebrow only. */
-
-.rcard {
-  position: relative;
-  flex: 0 0 var(--card);
+/* The seal is the section's credential: it says who took the photographs
+   before the visitor has to wonder. */
+.rr__seal {
+  flex: none;
   display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 11px;
-  border-radius: 26px;
-  background: linear-gradient(180deg, var(--white) 0%, #fffdf8 100%);
-  /* Ring + two-stage shadow: a tight contact shadow under a wide soft one. */
+  align-items: center;
+  gap: 13px;
+  padding: 14px 20px 14px 15px;
+  border-radius: var(--r-full);
+  background: linear-gradient(120deg, var(--white), var(--gold-050));
   box-shadow:
     inset 0 0 0 1px var(--gold-200),
-    0 1px 2px rgba(23, 18, 8, 0.04),
-    0 20px 44px -28px rgba(23, 18, 8, 0.34);
-  transition:
-    transform 0.6s var(--ease),
-    box-shadow 0.6s var(--ease);
+    0 18px 40px -30px rgba(23, 18, 8, 0.4);
 }
 
-.rcard:hover {
-  transform: translateY(-10px);
-  box-shadow:
-    inset 0 0 0 1px var(--gold-400),
-    0 2px 4px rgba(23, 18, 8, 0.05),
-    0 34px 62px -30px rgba(166, 124, 26, 0.5);
+.rr__seal-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--gold-800);
+  background: var(--gold-100);
+  box-shadow: inset 0 0 0 1px var(--gold-200);
 }
 
-/* Inner mat, so the photo reads as framed rather than bleeding to the edge. */
-.rcard__frame {
-  position: relative;
-  border-radius: 17px;
-  overflow: hidden;
-  background: var(--gold-050);
-  box-shadow: inset 0 0 0 1px rgba(166, 124, 26, 0.09);
+.rr__seal-copy {
+  display: grid;
+  gap: 2px;
 }
 
-/* One ratio for every card so the row stays even. `contain` keeps each
-   before/after collage whole — the sources come at two different ratios and
-   cropping would cut into the comparison itself. */
-.rcard__media {
-  aspect-ratio: 970 / 1280;
-}
-
-.rcard__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform 1.2s var(--ease);
-}
-
-.rcard:hover .rcard__media img {
-  transform: scale(1.035);
-}
-
-/* ---------- Caption plate ---------- */
-
-.rcard__foot {
-  position: relative;
-  margin-top: auto;
-  padding: 17px 5px 6px;
-  text-align: center;
-}
-
-/* Divider is a gold gradient that fades at both ends, not a flat grey line. */
-.rcard__foot::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 6px;
-  right: 6px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-200) 22%, var(--gold-200) 78%, transparent);
-}
-
-.rcard__treatment {
-  display: block;
-  font-size: 0.64rem;
+.rr__seal-copy strong {
+  font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--gold-700);
-}
-
-.rcard__caption {
-  display: block;
-  margin-top: 9px;
-  font-size: 0.97rem;
-  font-weight: 500;
-  line-height: 1.38;
   color: var(--ink);
 }
 
-/* Hairline that draws itself in on hover — the card's only moving detail. */
-.rcard__underline {
-  display: block;
-  width: 0;
-  height: 2px;
-  margin: 13px auto 0;
-  border-radius: var(--r-full);
-  background: var(--grad-gold);
-  transition: width 0.55s var(--ease);
+.rr__seal-copy small {
+  font-size: 0.72rem;
+  color: var(--muted);
 }
 
-.rcard:hover .rcard__underline {
+/* ---------- Stage ---------- */
+
+.rr__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
+  gap: clamp(28px, 4.6vw, 72px);
+  align-items: start;
+}
+
+/* ---------- Viewer ---------- */
+
+.rr__viewer {
+  position: relative;
+}
+
+/* Warm bloom under the print, so the frame sits in light rather than on a
+   flat field. Sized past the plate and blurred well beyond its own edges. */
+.rr__viewer::before {
+  content: '';
+  position: absolute;
+  inset: 8% -10% -6%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(201, 162, 39, 0.2), transparent 72%);
+  filter: blur(30px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rr__plate {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 970 / 1280;
+  border-radius: 26px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(170deg, var(--white), var(--gold-050));
+  box-shadow:
+    inset 0 0 0 1px var(--gold-200),
+    0 2px 4px rgba(23, 18, 8, 0.05),
+    0 42px 80px -44px rgba(23, 18, 8, 0.5);
+}
+
+/* Every case stays mounted and stacked, so switching is a cross-fade with no
+   layout shift and no second download when a case comes back around.
+   `contain` keeps each before/after collage whole — the sources arrive at two
+   ratios and a crop would cut into the comparison itself. */
+.rr__shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(1.045);
+  transition:
+    opacity 0.9s var(--ease-soft),
+    transform 1.4s var(--ease);
+}
+
+.rr__shot.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+/* Glass plate rather than a solid chip — it reads as a label on the print. */
+.rr__stamp {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  padding: 7px 14px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(201, 168, 120, 0.45);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--champ-800);
+}
+
+.rr__stamp i {
+  margin-inline: 4px;
+  font-style: normal;
+  color: var(--gold-600);
+}
+
+/* Two opposite corner brackets, set outside the plate. A full four-corner
+   frame reads as a viewfinder; a diagonal pair reads as a mount. */
+.rr__edge {
+  position: absolute;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  pointer-events: none;
+  border: 1.5px solid var(--gold-400);
+}
+
+.rr__edge--tl {
+  top: -11px;
+  left: -11px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: 12px;
+}
+
+.rr__edge--br {
+  right: -11px;
+  bottom: -11px;
+  border-top: 0;
+  border-left: 0;
+  border-bottom-right-radius: 12px;
+}
+
+/* ---------- Index ---------- */
+
+.rr__index {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rr__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--gold-200);
+}
+
+.rr__count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+
+.rr__count-now {
+  font-size: clamp(2.2rem, 3.4vw, 2.9rem);
+  font-weight: 500;
+  background: var(--grad-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* Digits are the same width, so the counter does not jitter as it advances. */
+  font-variant-numeric: tabular-nums;
+}
+
+.rr__count-all {
+  font-size: 1.15rem;
+  color: var(--champ-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.rr__nav {
+  display: flex;
+  gap: 8px;
+}
+
+.rr__step {
+  display: grid;
+  place-items: center;
   width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--gold-800);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--gold-200);
+  transition:
+    color 0.35s var(--ease-soft),
+    background 0.4s var(--ease-soft),
+    box-shadow 0.4s var(--ease-soft),
+    transform 0.4s var(--ease);
+}
+
+.rr__step:first-child svg {
+  transform: rotate(180deg);
+}
+
+.rr__step:hover {
+  color: #fffdf8;
+  background: var(--grad-gold-deep, var(--gold-700));
+  box-shadow: var(--sh-gold);
+  transform: translateY(-2px);
+}
+
+.rr__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rr__list li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+/* Rows carry no chrome until they are the case being shown — the index reads
+   as a printed contents page, and the active entry is the only lit one. */
+.rr__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 16px;
+  width: 100%;
+  padding: 17px 16px 17px 18px;
+  border-radius: 18px;
+  text-align: left;
+  transition:
+    background 0.5s var(--ease-soft),
+    box-shadow 0.5s var(--ease-soft);
+}
+
+/* Gold rail on the active entry, drawn from the centre out. */
+.rr__row::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 0;
+  width: 3px;
+  border-radius: var(--r-full);
+  background: var(--grad-gold);
+  transform: scaleY(0);
+  transition: transform 0.55s var(--ease);
+}
+
+.rr__row:hover {
+  background: var(--gold-050);
+}
+
+.rr__row.is-on {
+  background: linear-gradient(104deg, var(--white), var(--gold-050) 62%, var(--gold-100));
+  box-shadow:
+    inset 0 0 0 1px var(--gold-200),
+    0 22px 46px -34px rgba(23, 18, 8, 0.42);
+}
+
+.rr__row.is-on::before {
+  transform: scaleY(1);
+}
+
+.rr__row-no {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--champ-400);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.4s var(--ease-soft);
+}
+
+.rr__row.is-on .rr__row-no,
+.rr__row:hover .rr__row-no {
+  color: var(--gold-700);
+}
+
+.rr__row-body {
+  min-width: 0;
+}
+
+.rr__row-treat {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.9;
+  text-transform: uppercase;
+  color: var(--champ-600);
+  transition: color 0.4s var(--ease-soft);
+}
+
+.rr__row.is-on .rr__row-treat {
+  color: var(--gold-800);
+}
+
+/* 0fr → 1fr: the outcome unfolds out of the row rather than appearing in it.
+   The inner element owns the clipping so the grid can animate freely. */
+.rr__row-open {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s var(--ease);
+}
+
+.rr__row.is-on .rr__row-open {
+  grid-template-rows: 1fr;
+}
+
+.rr__row-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.rr__row-cap {
+  display: block;
+  padding-top: 5px;
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-soft) 0.1s;
+}
+
+.rr__row.is-on .rr__row-cap {
+  opacity: 1;
+}
+
+/* ---------- Timing bar ---------- */
+
+.rr__meter {
+  display: block;
+  height: 2px;
+  margin-top: 13px;
+  border-radius: var(--r-full);
+  background: var(--gold-200);
+  overflow: hidden;
+}
+
+.rr__meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad-gold);
+  transform-origin: left;
+  animation: rr-fill 6.4s linear;
+  /* Paused whenever the stage is off screen or under the pointer, so a case
+     never advances out from under someone reading it. */
+  animation-play-state: paused;
+}
+
+.rr__meter i[data-run='true'] {
+  animation-play-state: running;
+}
+
+@keyframes rr-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.rr__row-go {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--gold-700);
+  background: transparent;
+  opacity: 0;
+  transform: translate(-4px, 2px);
+  transition:
+    opacity 0.4s var(--ease-soft),
+    transform 0.45s var(--ease),
+    background 0.4s var(--ease-soft);
+}
+
+.rr__row:hover .rr__row-go,
+.rr__row.is-on .rr__row-go {
+  opacity: 1;
+  transform: none;
+  background: var(--gold-100);
 }
 
 /* ---------- Foot ---------- */
 
-.rail__foot {
-  display: grid;
-  justify-items: center;
-  gap: 20px;
-  margin-top: clamp(28px, 3.6vw, 42px);
-  text-align: center;
+.rr__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px clamp(24px, 4vw, 56px);
+  margin-top: clamp(30px, 4vw, 48px);
+  padding-top: clamp(22px, 3vw, 30px);
+  border-top: 1px solid var(--line);
 }
 
-.rail__note {
-  max-width: 62ch;
+.rr__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 64ch;
   font-size: 0.79rem;
   line-height: 1.65;
   color: var(--muted);
 }
 
-/* Motion off: no auto-scroll, but the rail stays browsable by hand. */
-@media (prefers-reduced-motion: reduce) {
-  .marquee {
-    overflow-x: auto;
+.rr__note svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--gold-600);
+}
+
+/* ==========================================================================
+   RESULTS — responsive
+   ========================================================================== */
+
+@media (max-width: 1080px) {
+  .rr__stage {
+    grid-template-columns: minmax(0, 370px) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  /* Stacked, the print leads and the index reads beneath it. */
+  .rr__stage {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(26px, 4vw, 34px);
   }
 
-  .marquee__track {
-    animation: none;
+  .rr__viewer {
+    max-width: 400px;
+    margin-inline: auto;
+  }
+
+  .rr__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rr__head > div {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .rr__seal {
+    width: 100%;
+  }
+
+  .rr__row {
+    gap: 12px;
+    padding: 15px 12px 15px 15px;
+  }
+
+  .rr__row-cap {
+    font-size: 0.95rem;
+  }
+
+  .rr__foot .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Motion off: no hand-off between cases, so the index becomes a plain manual
+   picker. The bar is hidden rather than frozen — a bar that never moves looks
+   broken. */
+@media (prefers-reduced-motion: reduce) {
+  .rr__meter {
+    display: none;
+  }
+
+  .rr__shot {
+    transform: none;
   }
 }
 
@@ -2010,10 +2359,6 @@
     top: 96px;
   }
 
-  .marquee {
-    --card: clamp(230px, 26vw, 292px);
-  }
-
   .ftr__top {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.6fr);
     gap: clamp(24px, 3vw, 38px);
@@ -2400,11 +2745,6 @@
   .faq__cta .btn,
   .reviews__aside .btn {
     width: 100%;
-  }
-
-  /* Shorter loop on phones so a full cycle is not a long wait. */
-  .marquee__track {
-    animation-duration: 32s;
   }
 
   .score {

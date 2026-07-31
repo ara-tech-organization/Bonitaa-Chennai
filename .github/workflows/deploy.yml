@@ -22,10 +22,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
-      - run: npm ci
+      # npm install, not ci: the lockfile is generated on Windows and omits
+      # sharp's Linux-only optional deps, which makes `npm ci` bail.
+      - run: npm install --no-audit --no-fund
       - run: npm run build
 
       - uses: actions/configure-pages@v5
