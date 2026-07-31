@@ -1,111 +1,572 @@
+/* ==========================================================================
+   Bonitaa Skin and Hair Care — Chennai
+   Design tokens + base layer. Palette is sampled from src/assets/Logo.png
+   (gold gradient wordmark) on a white ground.
+   ========================================================================== */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Gold — sampled from the logo gradient, dark bronze → highlight */
+  --gold-900: #6f4f10;
+  --gold-800: #8b6514;
+  --gold-700: #a67c1a;
+  --gold-600: #c9a227;
+  --gold-500: #d8ae36;
+  --gold-400: #e5c558;
+  --gold-300: #f0da96;
+  --gold-200: #f7ebc8;
+  --gold-100: #fcf6e7;
+  --gold-050: #fefbf3;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Ink + neutrals */
+  --ink: #171208;
+  --ink-soft: #3d3628;
+  --body: #5f584c;
+  --muted: #8a8377;
+  --line: #ece6da;
+  --line-soft: #f4f0e7;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --white: #ffffff;
+  --cream: #fdfaf4;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* Signature gradients */
+  --grad-gold: linear-gradient(
+    118deg,
+    var(--gold-800) 0%,
+    var(--gold-600) 26%,
+    var(--gold-300) 50%,
+    var(--gold-600) 74%,
+    var(--gold-800) 100%
+  );
+  --grad-gold-soft: linear-gradient(135deg, var(--gold-100) 0%, var(--white) 55%, var(--gold-100) 100%);
+
+  /* Elevation — warm-tinted so it sits inside the gold system */
+  --sh-xs: 0 1px 2px rgba(23, 18, 8, 0.04);
+  --sh-sm: 0 2px 10px rgba(23, 18, 8, 0.05);
+  --sh-md: 0 10px 30px -12px rgba(23, 18, 8, 0.12);
+  --sh-lg: 0 24px 60px -24px rgba(23, 18, 8, 0.18);
+  --sh-gold: 0 14px 34px -12px rgba(166, 124, 26, 0.42);
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-full: 999px;
+
+  --shell: 1200px;
+  --gutter: clamp(20px, 5vw, 48px);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --font: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
-  margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+* {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 96px;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+body {
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--body);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.1rem, 5.4vw, 3.85rem);
+}
+
+h2 {
+  font-size: clamp(1.7rem, 3.9vw, 2.7rem);
+}
+
+h3 {
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--gold-200);
+  color: var(--gold-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-600);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- Layout primitives ---------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  position: relative;
+  padding-block: clamp(64px, 9vw, 118px);
+}
+
+.section--tight {
+  padding-block: clamp(48px, 6vw, 76px);
+}
+
+.section--cream {
+  background: var(--cream);
+}
+
+.section-head {
+  max-width: 700px;
+  margin-inline: auto;
+  text-align: center;
+  margin-bottom: clamp(36px, 5vw, 60px);
+}
+
+.section-head p {
+  margin-top: 14px;
+  font-size: 1rem;
+}
+
+/* ---------- Eyebrow tag ---------- */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 16px 7px 13px;
+  margin-bottom: 20px;
+  border: 1px solid var(--gold-200);
+  border-radius: var(--r-full);
+  background: var(--gold-050);
+  color: var(--gold-800);
+  font-size: 0.71rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.eyebrow svg {
+  color: var(--gold-600);
+  flex: none;
+}
+
+/* ---------- Gold type treatment ---------- */
+
+.gold-text {
+  background: var(--grad-gold);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 7s var(--ease-soft) infinite;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.rule {
+  width: 62px;
+  height: 3px;
+  border-radius: var(--r-full);
+  background: var(--grad-gold);
+  margin: 18px auto 0;
+}
+
+/* Closing hairline — a full-width line that fades out at both ends, so a
+   section reads as finished rather than just stopping. */
+.section-end {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin-top: clamp(28px, 3.6vw, 44px);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-200) 18%,
+    var(--gold-400) 50%,
+    var(--gold-200) 82%,
+    transparent
+  );
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 28px;
+  border-radius: var(--r-full);
+  font-size: 0.94rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    transform 0.4s var(--ease),
+    box-shadow 0.4s var(--ease),
+    background-color 0.3s var(--ease-soft),
+    color 0.3s var(--ease-soft),
+    border-color 0.3s var(--ease-soft);
+}
+
+.btn svg {
+  flex: none;
+  transition: transform 0.4s var(--ease);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--gold {
+  color: #fffdf7;
+  background: linear-gradient(122deg, var(--gold-700) 0%, var(--gold-500) 52%, var(--gold-700) 100%);
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  box-shadow: var(--sh-gold);
+  transition:
+    transform 0.4s var(--ease),
+    box-shadow 0.4s var(--ease),
+    background-position 0.7s var(--ease);
+}
+
+.btn--gold:hover {
+  background-position: 100% 50%;
+  box-shadow: 0 18px 40px -12px rgba(166, 124, 26, 0.55);
+}
+
+/* Sheen sweep */
+.btn--gold::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.75s var(--ease);
+}
+
+.btn--gold:hover::after {
+  left: 130%;
+}
+
+.btn--outline {
+  color: var(--gold-900);
+  background: var(--white);
+  border: 1.5px solid var(--gold-300);
+  box-shadow: var(--sh-sm);
+}
+
+.btn--outline:hover {
+  border-color: var(--gold-600);
+  background: var(--gold-050);
+  box-shadow: var(--sh-md);
+}
+
+.btn--ghost {
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+
+.btn--ghost:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-900);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--lg {
+  padding: 17px 34px;
+  font-size: 1rem;
+}
+
+.btn:hover svg.arrow {
+  transform: translateX(4px);
+}
+
+/* ---------- Scroll reveal ----------
+   Driven by keyframes, not transitions. Cards declare their own `transition`
+   shorthand for hover, which resets `transition-delay` and silently killed the
+   per-item stagger; an animation with `backwards` fill sidesteps that entirely
+   — the from-state holds through the delay, and once it finishes the element
+   falls back to its normal styles so hover behaves as usual. */
+
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-in {
+  opacity: 1;
+  animation: reveal-in 0.85s var(--ease) var(--delay, 0ms) backwards;
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+}
+
+/* Cards get a touch of scale so a grid reads as pieces settling into place. */
+.trust__item.is-in,
+.rcard.is-in,
+.svc.is-in,
+.why__item.is-in,
+.rev.is-in,
+.loc-card.is-in,
+.qa.is-in {
+  animation-name: reveal-card;
+}
+
+@keyframes reveal-card {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.965);
+  }
+}
+
+/* Photos and maps ease out of a slight push-in behind their own frame. */
+.rcard.is-in .rcard__media img,
+.loc-card.is-in .loc-card__map iframe {
+  animation: reveal-zoom 1.3s var(--ease) var(--delay, 0ms) backwards;
+}
+
+@keyframes reveal-zoom {
+  from {
+    transform: scale(1.12);
+  }
+}
+
+/* ---------- Heading cascade ----------
+   A heading block is a single observer target, but its parts arrive on their
+   own beat — tag, then heading, then rule, then description, then any control
+   — so the block reads top-down instead of landing as one slab. The wrapper
+   itself is neutralised; all the motion belongs to the children.
+
+   `.results__head` nests its copy one level deeper, beside the rail arrows. */
+
+/* The wrapper is only the observer target — all motion belongs to the parts. */
+.section-head.reveal,
+.results__head.reveal,
+.reviews__aside.reveal {
+  opacity: 1;
+  animation: none;
+}
+
+.section-head > *,
+.results__head > div > *,
+.results__head > .rail__nav,
+.reviews__aside > * {
+  opacity: 0;
+}
+
+.section-head.is-in > *,
+.results__head.is-in > div > *,
+.results__head.is-in > .rail__nav,
+.reviews__aside.is-in > * {
+  opacity: 1;
+  animation: reveal-in 0.75s var(--ease) backwards;
+}
+
+/* Beat order, shared by every heading block. */
+.section-head.is-in > .eyebrow,
+.results__head.is-in > div > .eyebrow,
+.reviews__aside.is-in > .eyebrow {
+  animation-name: reveal-tag;
+  animation-delay: 60ms;
+}
+
+@keyframes reveal-tag {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+}
+
+.section-head.is-in > h2,
+.results__head.is-in > div > h2,
+.reviews__aside.is-in > h2 {
+  animation-delay: 170ms;
+}
+
+.section-head.is-in > .rule {
+  animation-name: reveal-rule;
+  animation-delay: 280ms;
+}
+
+@keyframes reveal-rule {
+  from {
+    opacity: 0;
+    transform: scaleX(0.15);
+  }
+}
+
+.section-head.is-in > p,
+.results__head.is-in > div > p,
+.reviews__aside.is-in > .reviews__intro {
+  animation-delay: 380ms;
+}
+
+.reviews__aside.is-in > .score {
+  animation-delay: 300ms;
+}
+
+.results__head.is-in > .rail__nav,
+.reviews__aside.is-in > .btn {
+  animation-delay: 470ms;
+}
+
+/* ---------- Ambient ornaments ----------
+   Purely decorative: a soft gold bloom in one corner and a faint dot field in
+   the other, so the generous whitespace around each section reads as designed
+   rather than empty. Both are clipped inside the section box — no negative
+   offsets — so they can never create horizontal overflow. */
+
+.booking::before,
+.about::before,
+.results::before,
+.services::before,
+.why::before,
+.reviews::before,
+.faq::before,
+.locations::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(460px, 42vw);
+  height: min(460px, 42vw);
+  background: radial-gradient(circle at 70% 30%, rgba(216, 174, 54, 0.13), transparent 62%);
+  pointer-events: none;
+}
+
+.results::after,
+.services::after,
+.why::after,
+.reviews::after,
+.faq::after,
+.locations::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(300px, 30vw);
+  height: 190px;
+  background-image: radial-gradient(rgba(166, 124, 26, 0.16) 1px, transparent 1px);
+  background-size: 17px 17px;
+  mask-image: linear-gradient(to top right, #000, transparent 72%);
+  -webkit-mask-image: linear-gradient(to top right, #000, transparent 72%);
+  pointer-events: none;
+}
+
+/* Content always sits above the ornaments. */
+.section > .shell,
+.section > .rail__track {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  /* Nothing waits on an observer or a stagger when motion is off. */
+  .reveal,
+  .section-head > *,
+  .results__head > div > *,
+  .results__head > .rail__nav,
+  .reviews__aside > * {
+    opacity: 1;
+    transform: none;
+  }
 }
