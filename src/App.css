@@ -264,405 +264,6 @@
 }
 
 /* ==========================================================================
-   HERO — centred, over a 3D ring backdrop
-   ========================================================================== */
-
-.hero {
-  position: relative;
-  /* Clears the fixed header (84px) plus breathing room. */
-  padding-top: clamp(118px, 15vw, 172px);
-  padding-bottom: clamp(52px, 7vw, 88px);
-  overflow: hidden;
-  background: linear-gradient(180deg, var(--gold-050) 0%, var(--white) 68%);
-}
-
-/* ---------- 3D backdrop ---------- */
-
-.stage {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  /* Real perspective, so the tilted rings read as depth rather than ovals. */
-  perspective: 1300px;
-  perspective-origin: 50% 42%;
-}
-
-.stage__glow {
-  position: absolute;
-  top: 46%;
-  left: 50%;
-  width: min(1080px, 130vw);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(216, 174, 54, 0.17), rgba(216, 174, 54, 0) 62%);
-  animation: halo-pulse 9s var(--ease-soft) infinite;
-}
-
-@keyframes halo-pulse {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.07);
-    opacity: 1;
-  }
-}
-
-.stage__rings {
-  position: absolute;
-  top: 46%;
-  left: 50%;
-  width: min(1180px, 142vw);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  transform-style: preserve-3d;
-}
-
-.ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1.5px solid var(--gold-300);
-  transform-style: preserve-3d;
-}
-
-/* A travelling node welded to each ring, which sells the rotation. */
-.ring::after {
-  content: '';
-  position: absolute;
-  top: -5px;
-  left: 50%;
-  width: 10px;
-  height: 10px;
-  margin-left: -5px;
-  border-radius: 50%;
-  background: linear-gradient(130deg, var(--gold-600), var(--gold-400));
-  box-shadow: 0 0 14px rgba(201, 162, 39, 0.9);
-}
-
-.ring--1 {
-  inset: 0;
-  animation: ring-1 34s linear infinite;
-}
-
-.ring--2 {
-  inset: 11%;
-  border-color: var(--gold-400);
-  animation: ring-2 26s linear infinite;
-}
-
-.ring--3 {
-  inset: 23%;
-  border-style: dashed;
-  animation: ring-3 40s linear infinite;
-}
-
-.ring--4 {
-  inset: 34%;
-  border-color: var(--gold-400);
-  animation: ring-4 21s linear infinite;
-}
-
-@keyframes ring-1 {
-  from {
-    transform: rotateX(72deg) rotateZ(0deg);
-  }
-  to {
-    transform: rotateX(72deg) rotateZ(360deg);
-  }
-}
-
-@keyframes ring-2 {
-  from {
-    transform: rotateX(64deg) rotateY(14deg) rotateZ(360deg);
-  }
-  to {
-    transform: rotateX(64deg) rotateY(14deg) rotateZ(0deg);
-  }
-}
-
-@keyframes ring-3 {
-  from {
-    transform: rotateX(78deg) rotateY(-12deg) rotateZ(0deg);
-  }
-  to {
-    transform: rotateX(78deg) rotateY(-12deg) rotateZ(360deg);
-  }
-}
-
-@keyframes ring-4 {
-  from {
-    transform: rotateX(58deg) rotateY(-20deg) rotateZ(360deg);
-  }
-  to {
-    transform: rotateX(58deg) rotateY(-20deg) rotateZ(0deg);
-  }
-}
-
-/* ---------- Centred content ---------- */
-
-.hero__inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-/* Brand medallion — the scan line nods to the scalp analysis the copy promises. */
-.hero__mark {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: clamp(88px, 11vw, 116px);
-  aspect-ratio: 1;
-  margin-bottom: 26px;
-  overflow: hidden;
-  border-radius: 50%;
-  background: var(--white);
-  border: 1px solid var(--gold-200);
-  box-shadow:
-    var(--sh-lg),
-    0 0 0 10px rgba(255, 255, 255, 0.55);
-  animation: mark-float 7s var(--ease-soft) infinite;
-}
-
-@keyframes mark-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.hero__mark img {
-  position: relative;
-  z-index: 2;
-  width: 66%;
-  height: auto;
-}
-
-.hero__mark-sheen {
-  position: absolute;
-  inset: -30%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(216, 174, 54, 0.2) 60deg,
-    transparent 140deg,
-    transparent 360deg
-  );
-  animation: sheen-spin 9s linear infinite;
-}
-
-@keyframes sheen-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.hero__mark-scan {
-  position: absolute;
-  z-index: 3;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  border-radius: var(--r-full);
-  background: linear-gradient(90deg, transparent, var(--gold-500), transparent);
-  animation: scan 3.8s var(--ease-soft) infinite;
-}
-
-@keyframes scan {
-  0%,
-  100% {
-    top: 22%;
-    opacity: 0;
-  }
-  15%,
-  85% {
-    opacity: 1;
-  }
-  50% {
-    top: 76%;
-  }
-}
-
-.hero h1 {
-  max-width: 17ch;
-}
-
-.hero__sub {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 22px;
-  font-size: clamp(0.92rem, 1.5vw, 1.02rem);
-  font-weight: 500;
-  color: var(--gold-900);
-}
-
-.hero__dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--gold-400);
-}
-
-.hero__body {
-  margin-top: 16px;
-  max-width: 58ch;
-  font-size: clamp(0.97rem, 1.4vw, 1.06rem);
-}
-
-.hero__cta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 34px;
-}
-
-.hero__trust {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 26px;
-  margin-top: 30px;
-  list-style: none;
-  padding: 0;
-}
-
-.hero__trust li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-
-.hero__trust svg {
-  color: var(--gold-700);
-  flex: none;
-}
-
-/* ---------- Stat row ---------- */
-
-.hero__stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(10px, 1.4vw, 18px);
-  width: 100%;
-  max-width: 720px;
-  margin-top: clamp(38px, 5vw, 56px);
-}
-
-.hstat {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px 18px;
-  border-radius: var(--r-md);
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--gold-200);
-  box-shadow: var(--sh-sm);
-  transition:
-    transform 0.45s var(--ease),
-    box-shadow 0.45s var(--ease),
-    border-color 0.35s var(--ease-soft);
-}
-
-.hstat:hover {
-  transform: translateY(-4px);
-  border-color: var(--gold-400);
-  box-shadow: var(--sh-md);
-}
-
-.hstat__ic {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  color: var(--gold-800);
-  background: var(--gold-100);
-  border: 1px solid var(--gold-200);
-}
-
-.hstat__text {
-  text-align: left;
-}
-
-.hstat__text strong {
-  display: block;
-  font-size: 1.02rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--ink);
-}
-
-.hstat__text small {
-  display: block;
-  font-size: 0.73rem;
-  letter-spacing: 0.02em;
-  color: var(--muted);
-}
-
-/* The backdrop is decorative; stop all of it when motion is not wanted. */
-@media (prefers-reduced-motion: reduce) {
-  .ring,
-  .stage__glow,
-  .hero__mark,
-  .hero__mark-sheen,
-  .hero__mark-scan {
-    animation: none;
-  }
-
-  .ring--1 {
-    transform: rotateX(72deg);
-  }
-
-  .ring--2 {
-    transform: rotateX(64deg) rotateY(14deg);
-  }
-
-  .ring--3 {
-    transform: rotateX(78deg) rotateY(-12deg);
-  }
-
-  .ring--4 {
-    transform: rotateX(58deg) rotateY(-20deg);
-  }
-}
-
-.hero__phone-strip {
-  position: relative;
-  width: calc(100% - var(--gutter) * 2);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 28px var(--gutter) 0;
-  padding: 14px;
-  border-radius: var(--r-full);
-  background: var(--gold-050);
-  border: 1px dashed var(--gold-300);
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--gold-900);
-}
-
-/* ==========================================================================
    BOOKING
    ========================================================================== */
 
@@ -719,16 +320,6 @@
   margin-bottom: 14px;
   font-size: 0.9rem;
   color: var(--muted);
-}
-
-/* Number stays visible beside the button — the label carries the spec wording. */
-.booking__call-num {
-  display: block;
-  margin-top: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--ink);
 }
 
 .booking__card {
@@ -1102,11 +693,15 @@
   background: var(--gold-100);
 }
 
+/* Display numerals follow the headings onto the serif. */
 .trust__value {
-  font-size: clamp(1.3rem, 2.4vw, 1.72rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  background: var(--grad-gold);
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 2.8vw, 2.05rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  /* Deep gradient, not --grad-gold: these are the page's headline figures and
+     the pale midpoint left them barely readable against the cream. */
+  background: var(--grad-gold-deep);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1166,7 +761,7 @@
 
 .about__panel-title {
   position: relative;
-  font-size: clamp(1.08rem, 1.9vw, 1.26rem);
+  font-size: clamp(1.3rem, 2.1vw, 1.52rem);
   margin-bottom: 24px;
 }
 
@@ -1660,7 +1255,7 @@
 
 .why__item h3 {
   margin-bottom: 10px;
-  font-size: 1.02rem;
+  font-size: 1.26rem;
 }
 
 .why__item p {
@@ -1702,10 +1297,11 @@
 }
 
 .score__value {
-  font-size: 2.9rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  font-weight: 500;
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
   background: var(--grad-gold);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1913,98 +1509,6 @@
 }
 
 /* ==========================================================================
-   LOCATIONS — map embeds, one card per Chennai branch
-   ========================================================================== */
-
-.locations__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(20px, 2.6vw, 32px);
-}
-
-.loc-card {
-  overflow: hidden;
-  border-radius: var(--r-lg);
-  background: var(--white);
-  border: 1px solid var(--line);
-  box-shadow: var(--sh-sm);
-  transition:
-    transform 0.45s var(--ease),
-    box-shadow 0.45s var(--ease-soft),
-    border-color 0.45s var(--ease-soft);
-}
-
-.loc-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--gold-200);
-  box-shadow: var(--sh-md);
-}
-
-/* Fixed ratio keeps both maps the same height regardless of card copy. */
-.loc-card__map {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  background: var(--cream);
-}
-
-.loc-card__map iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
-
-.loc-card__body {
-  padding: clamp(18px, 2.2vw, 26px);
-  border-top: 1px solid var(--line-soft);
-}
-
-.loc-card__body h3 {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 1.12rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.loc-card__body h3 svg {
-  color: var(--gold-700);
-  flex: none;
-}
-
-.loc-card__body address {
-  display: grid;
-  gap: 2px;
-  margin-top: 10px;
-  font-style: normal;
-  font-size: 0.89rem;
-  line-height: 1.6;
-  color: var(--body);
-}
-
-.loc-card__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 16px;
-  font-size: 0.87rem;
-  font-weight: 500;
-  color: var(--gold-900);
-  transition: gap 0.35s var(--ease);
-}
-
-.loc-card__link:hover {
-  gap: 12px;
-}
-
-.loc-card__link svg {
-  color: var(--gold-700);
-}
-
-/* ==========================================================================
    FOOTER
    ========================================================================== */
 
@@ -2081,8 +1585,11 @@
   border-color: var(--gold-300);
 }
 
+/* Stays on the sans — a 0.78rem uppercase label at 0.14em tracking is a UI
+   label, not display type, and Cormorant has no 600 to give it. */
 .ftr__h {
   margin-bottom: 20px;
+  font-family: var(--font);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -2129,8 +1636,7 @@
   text-wrap: pretty;
 }
 
-/* Thumbnail map under each address — small on purpose; the Locations section
-   carries the full-size embeds. */
+/* Thumbnail map under each address — the only map on the page. */
 .ftr__branch-map {
   position: relative;
   aspect-ratio: 16 / 10;
@@ -2342,8 +1848,8 @@
 }
 
 .invite h3 {
-  font-size: clamp(1.16rem, 2.4vw, 1.42rem);
-  line-height: 1.3;
+  font-size: clamp(1.4rem, 2.8vw, 1.72rem);
+  line-height: 1.22;
 }
 
 .invite__sub {
@@ -2446,7 +1952,7 @@
 
 .call h3 {
   margin-top: 8px;
-  font-size: 1.2rem;
+  font-size: 1.44rem;
 }
 
 .call__branch {
@@ -2484,7 +1990,35 @@
 
 /* ==========================================================================
    RESPONSIVE
+
+   Breakpoints, largest first. Type, section padding and most gaps are already
+   fluid via clamp(), so these only handle the changes clamp cannot express —
+   column counts, stacking order, and swapping desktop chrome for phone chrome.
+
+     lg   ≤1200px   small laptops — tighten the widest columns
+     lg   ≤1080px   inline nav gives way to the drawer
+     md   ≤940px    two-column sections stack
+     sm   ≤760px    phone chrome: sticky bar, collapsed header
+     sm   ≤680px    stat row reflows on its own
+     xs   ≤560px    single column throughout
+     xs   ≤400px    smallest phones
    ========================================================================== */
+
+@media (max-width: 1200px) {
+  /* Sticky offset follows the shorter stuck header. */
+  .reviews__aside {
+    top: 96px;
+  }
+
+  .marquee {
+    --card: clamp(230px, 26vw, 292px);
+  }
+
+  .ftr__top {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.6fr);
+    gap: clamp(24px, 3vw, 38px);
+  }
+}
 
 @media (max-width: 1080px) {
   /* Burger appears at the same width the inline nav disappears, otherwise the
@@ -2508,53 +2042,79 @@
     display: block;
   }
 
+  /* Tablet footer: brand and quick links share the first row, and the clinics
+     take the whole second row. Left in the half-width middle column they were
+     too narrow for two address blocks, so the branches — and their maps —
+     stacked into a very tall column. */
   .ftr__top {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.46fr);
+  }
+
+  .ftr__brand {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .ftr__links {
-    grid-column: span 2;
+    grid-column: 2;
+    grid-row: 1;
   }
 
-  .ftr__links ul {
-    grid-template-columns: repeat(4, auto);
-    justify-content: start;
-    gap: 26px;
+  .ftr__branches {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-top: clamp(24px, 3vw, 34px);
+    border-top: 1px solid var(--f-line);
+  }
+
+  /* Three services across leaves them too narrow once the drawer appears. */
+  .services__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking__inner {
+    gap: clamp(30px, 4vw, 46px);
+  }
+}
+
+/* Booking and About keep their two-column composition through the tablet band
+   — copy on one side, form or panel on the other. Only the ratios and the gap
+   tighten; they do not stack until phone width. */
+@media (min-width: 761px) and (max-width: 940px) {
+  .booking__inner {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(24px, 3.2vw, 38px);
+  }
+
+  .about__inner {
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    gap: clamp(26px, 3.4vw, 44px);
+  }
+
+  /* The card loses most of its side padding to the narrower column, so the
+     two-up name/phone row needs a tighter gutter to stay comfortable. */
+  .booking__card {
+    padding: clamp(20px, 2.6vw, 28px);
+  }
+
+  .form__row {
+    gap: 13px;
+  }
+
+  .about__panel {
+    padding: clamp(22px, 2.8vw, 30px);
+  }
+
+  /* The badge overhangs the panel by 18px on desktop. With the tablet gap down
+     to ~26px that would leave it almost touching the copy column. */
+  .about__stat {
+    right: -4px;
+    bottom: -16px;
+    padding: 14px 18px;
   }
 }
 
 @media (max-width: 940px) {
-  .booking__inner,
-  .about__inner {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* Rings tighten around the narrower content column. */
-  .stage__rings {
-    width: min(880px, 150vw);
-  }
-
-  .about__media {
-    max-width: 520px;
-    margin-inline: auto;
-  }
-
-  .about__copy {
-    text-align: center;
-  }
-
-  .about__pillars li {
-    text-align: left;
-  }
-
-  .about__stat {
-    right: 14px;
-  }
-
-  .services__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .why__grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2567,25 +2127,109 @@
     border-right: 0;
   }
 
-  /* Reviews stack, so the score panel stops sticking beside the list. */
+  /* Reviews stack, so the score panel stops sticking beside the list. The
+     measure is held for the same reason as About — full-width review bodies
+     run far past a comfortable line length. */
   .reviews__inner {
     grid-template-columns: minmax(0, 1fr);
+    max-width: 760px;
+    margin-inline: auto;
   }
 
   .reviews__aside {
     position: static;
+    text-align: center;
   }
 
-  .locations__grid {
-    grid-template-columns: minmax(0, 1fr);
-    max-width: 560px;
+  .reviews__aside .score {
+    justify-content: center;
+  }
+
+  .reviews__aside .reviews__intro {
+    max-width: 56ch;
     margin-inline: auto;
+  }
+
+  /* The FAQ column no longer needs its own narrower measure. */
+  .faq__inner {
+    max-width: none;
+  }
+}
+
+/* Tablet only: once the score panel sits above the list rather than beside it,
+   the full width is free — so reviews pair up two to a row instead of running
+   as one long column. Floor at 561px keeps phones on the single-column list. */
+@media (min-width: 561px) and (max-width: 940px) {
+  .reviews__inner {
+    max-width: 900px;
+  }
+
+  .reviews__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(22px, 3.2vw, 36px);
+  }
+
+  /* The list's rhythm comes from a rule under each item. In two columns the
+     first row needs no top padding and the last row no rule, so the block
+     still closes cleanly. */
+  .rev:nth-child(-n + 2) {
+    padding-top: 0;
+  }
+
+  .rev:nth-last-child(-n + 2) {
+    padding-bottom: 0;
+    border-bottom: 0;
   }
 }
 
 @media (max-width: 760px) {
+  /* Phone width is where the two-column sections finally stack. */
+  .booking__inner,
+  .about__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Stacked, the copy and the form both inherit the full section width and the
+     block reads as a lot of type against a lot of empty right margin. Holding
+     the column to a comfortable measure fixes that without centring a form —
+     labels and fields stay left-aligned, which is how forms should read. */
+  .booking__inner {
+    max-width: 620px;
+    margin-inline: auto;
+  }
+
+  .about__media {
+    max-width: 520px;
+    margin-inline: auto;
+  }
+
+  .about__copy {
+    text-align: center;
+  }
+
+  /* Centred over the full section width the paragraphs run long. Holding them
+     to a measure is what keeps centred copy readable. */
+  .about__copy > p,
+  .about__sub {
+    max-width: 62ch;
+    margin-inline: auto;
+  }
+
+  .about__pillars {
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  .about__pillars li {
+    text-align: left;
+  }
+
+  .about__stat {
+    right: 14px;
+  }
+
   /* Phone collapses to just the ring icon; the number stays reachable via
-     the sticky action bar and the hero strip. */
+     the sticky action bar and the hero's own tel link. */
   .hdr__cta,
   .hdr__phone-num {
     display: none;
@@ -2611,13 +2255,7 @@
     gap: 12px;
   }
 
-  .hero {
-    padding-top: 102px;
-  }
-
-  .hero__phone-strip {
-    display: flex;
-  }
+  /* The hero owns its own spacing and breakpoints — see hero/hero.css. */
 
   .action-bar {
     display: flex;
@@ -2658,6 +2296,64 @@
     justify-content: center;
     text-align: center;
   }
+
+  /* Sections lose a chunk of vertical air — clamp's floor is still generous
+     for a viewport this short. */
+  .section {
+    padding-block: clamp(50px, 8vw, 72px);
+  }
+
+  .section-head {
+    margin-bottom: 32px;
+  }
+
+  .qa__q {
+    padding: 17px 16px;
+    gap: 12px;
+  }
+
+  .qa.is-open .qa__panel > p {
+    padding-bottom: 18px;
+  }
+
+  .overlay {
+    padding: 14px;
+  }
+
+  /* One footer column, so the thumbnail can use the full measure. */
+  .ftr__branch-map {
+    max-width: 320px;
+  }
+
+  .ftr__branch-grid {
+    gap: 22px;
+  }
+}
+
+/* Five stats in a row stop being readable well before the page reaches phone
+   width, so the trust bar becomes a tile grid here rather than at 560. */
+@media (max-width: 680px) {
+  .trust__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .trust__item {
+    border-right: 0;
+    padding: 14px 6px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+  }
+
+  /* Odd one out spans the full width instead of leaving a hole. */
+  .trust__item:nth-child(5) {
+    grid-column: span 2;
+  }
+
+  .rev__badge {
+    display: none;
+  }
 }
 
 @media (max-width: 560px) {
@@ -2670,43 +2366,45 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* Shorter loop on phones so a full cycle is not a long wait. */
-  .marquee__track {
-    animation-duration: 32s;
+  /* Long CTA labels must wrap rather than run past the viewport. */
+  .btn {
+    white-space: normal;
+    text-align: center;
   }
 
-  .trust__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+  .btn--lg {
+    padding: 15px 24px;
+    font-size: 0.95rem;
   }
 
-  .trust__item {
-    border-right: 0;
-    padding: 14px 6px;
-    background: var(--white);
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
+  .rev__head {
+    gap: 11px;
   }
 
-  .trust__item:nth-child(5) {
-    grid-column: span 2;
+  .rev__avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
   }
 
-  .hero__cta .btn {
+  .rev__text {
+    line-height: 1.72;
+  }
+
+  .booking__call .btn,
+  .ftr__phone {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .faq__cta .btn,
+  .reviews__aside .btn {
     width: 100%;
   }
 
-  /* Three stat tiles across is too tight on a phone. */
-  .hero__stats {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .hstat {
-    justify-content: flex-start;
-  }
-
-  .rev__badge {
-    display: none;
+  /* Shorter loop on phones so a full cycle is not a long wait. */
+  .marquee__track {
+    animation-duration: 32s;
   }
 
   .score {
@@ -2731,14 +2429,57 @@
   .call {
     max-width: none;
   }
+
+  .invite h3 {
+    padding-right: 26px;
+  }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 400px) {
   .chips {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .hstat {
-    padding: 12px 14px;
+  .hdr__logo img {
+    height: 30px;
+  }
+
+  .action-bar {
+    gap: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .action-bar__btn {
+    padding: 12px 8px;
+    font-size: 0.86rem;
+  }
+
+  .action-bar__btn--call {
+    flex: 0 0 32%;
+  }
+
+  .trust__value {
+    font-size: 1.28rem;
+  }
+
+  .trust__label {
+    font-size: 0.71rem;
+  }
+
+  .qa__q {
+    font-size: 0.93rem;
+    padding: 15px 14px;
+  }
+
+  .qa__panel > p {
+    padding-inline: 14px;
+  }
+
+  .booking__card {
+    padding: 20px 14px 24px;
+  }
+
+  .ftr .shell {
+    padding-inline: 18px;
   }
 }

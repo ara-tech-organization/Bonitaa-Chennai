@@ -1,0 +1,480 @@
+/* ==========================================================================
+   HERO — photographic, copy set in the artwork's white space
+   Scoped to .hero so nothing leaks into the page's gold system.
+   ========================================================================== */
+
+.hero {
+  /* Local alias; the stack itself is the page-wide display face. */
+  --serif: var(--font-display);
+  /* Sampled from Hero.png's own empty region, so the artwork's edges melt
+     into the section instead of showing a seam where it ends. */
+  --paper: #fefefe;
+
+  position: relative;
+  /* Slightly wider than the artwork's own 3:2, which trims ~8% off the top of
+     the image — just the decorative arc, well clear of the model's hair at
+     19.1% down. Everything else renders full-bleed at full size. */
+  aspect-ratio: 1.63 / 1;
+  /* Floor for short or narrow windows, where 3:2 alone would not clear the
+     copy. Below it the image letterboxes slightly against matching paper. */
+  min-height: min(94svh, 720px);
+  display: flex;
+  /* Centred against the artwork, so the copy sits level with the model rather
+     than riding the top edge. The asymmetric padding below lifts it slightly
+     off true centre, which keeps it clear of the wave along the bottom. */
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--paper);
+  /* Top clears the 84px fixed header; the heavier bottom value biases the
+     centred copy upward, away from the wave across the artwork's base. */
+  padding-block: clamp(96px, 9.5vh, 120px) clamp(80px, 14vh, 200px);
+}
+
+/* Full-bleed: the image spans the whole section, so the copy overlays its
+   blank region rather than sitting in a column beside it. */
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ==========================================================================
+   MEDIA
+   ========================================================================== */
+
+.hm {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Anchored bottom-right, so the only thing the section's ratio trims is the
+   top of the artwork. On short windows where the min-height floor takes over,
+   the overflow comes off the left instead — which is blank paper, not
+   composition. The model, products and logo are never touched. */
+.hm__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right bottom;
+}
+
+/* Contrast guarantee where the copy overlaps the artwork's white region.
+   Uses the sampled paper colour, so it tints nothing — it only ensures the
+   text never sits on the model at intermediate widths. */
+.hm__wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    96deg,
+    var(--paper) 0%,
+    rgba(254, 254, 254, 0.94) 28%,
+    rgba(254, 254, 254, 0.55) 42%,
+    rgba(254, 254, 254, 0) 54%
+  );
+}
+
+/* The contained image ends exactly on the section's bottom edge, which left a
+   visible hairline where the artwork met the page. This dissolves it. */
+.hm__foot {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 26%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(254, 254, 254, 0.55) 58%,
+    var(--paper) 88%,
+    var(--paper) 100%
+  );
+}
+
+/* Film grain — inline SVG turbulence, no image request. */
+.hm__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   GRID
+   ========================================================================== */
+
+/* Not the page's centred 1560px shell. The image is full-bleed, so the space
+   the copy may occupy is measured off the viewport, not off a centred column —
+   a centred shell pushed the copy inward and straight onto the artwork. */
+.hero__grid {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-inline: clamp(20px, 4vw, 72px);
+  display: grid;
+  grid-template-columns: minmax(0, 54fr) minmax(0, 46fr);
+  align-items: center;
+}
+
+/* Two caps, whichever is smaller:
+   - 76ch  — the credentials line on one line, its widest child.
+   - 38vw  — keeps every line inside the artwork's clear zone, which begins at
+             42.8% across in the band the copy occupies (measured from the
+             pixels, not estimated). */
+.hero__copy {
+  max-width: min(76ch, 38vw);
+  width: 100%;
+  will-change: transform, opacity;
+}
+
+.hero__eyebrow {
+  display: inline-block;
+  margin-bottom: clamp(12px, 1.6vw, 18px);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--champ-300);
+  font-size: 0.67rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--champ-700);
+}
+
+/* ---------- Headline ---------- */
+
+.hero__title {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  /* Sized so "Chennai's Trusted" holds one line in this column, and so the
+     copy has enough presence to balance the artwork opposite it. */
+  font-size: clamp(2.1rem, 3.9vw, 4.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.hero__line {
+  display: block;
+  /* Clips the rise so each line emerges from behind the one above. */
+  overflow: hidden;
+  padding-bottom: 0.05em;
+}
+
+.hero__line-inner {
+  display: block;
+  will-change: transform, filter, opacity;
+}
+
+.hero__word + .hero__word {
+  margin-left: 0.22em;
+}
+
+.hero__word.is-accent {
+  font-style: italic;
+  background: linear-gradient(104deg, var(--champ-700), var(--gold-600) 48%, var(--champ-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Credentials — three self-contained pills rather than one pipe-separated
+   run. Each carries its own outline, so the group reflows to two lines at
+   narrow widths without any dangling separator or ragged break. */
+.hero__sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: clamp(16px, 2vw, 22px);
+  font-size: clamp(0.76rem, 0.82vw, 0.86rem);
+  font-weight: 500;
+  color: var(--champ-800);
+}
+
+.hero__sub-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 15px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 0 0 1px rgba(201, 168, 120, 0.42);
+  white-space: nowrap;
+  transition:
+    transform 0.4s var(--ease),
+    box-shadow 0.4s var(--ease);
+}
+
+/* Gold bead marking each credential. */
+.hero__sub-item::before {
+  content: '';
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: linear-gradient(130deg, var(--gold-600), var(--gold-400));
+}
+
+.hero__sub-item:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px rgba(201, 168, 120, 0.85);
+}
+
+.hero__lede {
+  max-width: 46ch;
+  margin-top: clamp(12px, 1.5vw, 17px);
+  font-size: clamp(0.92rem, 0.95vw, 1rem);
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+/* ---------- Magnetic CTAs ---------- */
+
+.hero__ctas {
+  display: flex;
+  /* One row — the pair reads as a single decision, not a stack. */
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: clamp(20px, 2.4vw, 28px);
+}
+
+.mbtn {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  border-radius: var(--r-full);
+  padding: 0;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.mbtn__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.mbtn__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  transition:
+    transform 0.5s var(--ease),
+    background 0.4s var(--ease-soft);
+}
+
+.mbtn--solid {
+  color: #fffdf8;
+  background: linear-gradient(122deg, var(--gold-800), var(--gold-500) 52%, var(--gold-700));
+  background-size: 200% 100%;
+  box-shadow: 0 16px 38px -16px rgba(139, 101, 20, 0.6);
+  transition:
+    background-position 0.8s var(--ease),
+    box-shadow 0.5s var(--ease);
+}
+
+.mbtn--solid:hover {
+  background-position: 100% 50%;
+  box-shadow: 0 22px 48px -16px rgba(139, 101, 20, 0.76);
+}
+
+.mbtn--solid .mbtn__icon {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Only the trailing arrow spins — rotating the phone glyph would read as a
+   glitch rather than a flourish. */
+.mbtn:hover .mbtn__icon:not(.mbtn__icon--lead) {
+  transform: rotate(45deg);
+}
+
+.mbtn--solid:hover .mbtn__icon {
+  background: rgba(255, 255, 255, 0.36);
+}
+
+/* Light sweep across the solid CTA. */
+.mbtn--solid::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 -55%;
+  width: 42%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.85s var(--ease);
+}
+
+.mbtn--solid:hover::after {
+  left: 130%;
+}
+
+.mbtn--glass {
+  color: var(--champ-800);
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(14px) saturate(170%);
+  -webkit-backdrop-filter: blur(14px) saturate(170%);
+  box-shadow:
+    inset 0 0 0 1px rgba(201, 168, 120, 0.5),
+    0 12px 30px -20px rgba(109, 80, 39, 0.4);
+  transition: box-shadow 0.45s var(--ease);
+}
+
+.mbtn--glass:hover {
+  box-shadow:
+    inset 0 0 0 1px rgba(201, 168, 120, 0.92),
+    0 16px 36px -18px rgba(109, 80, 39, 0.34);
+}
+
+/* ---------- Trust strip ---------- */
+
+.hero__strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 0;
+  margin: clamp(20px, 2.4vw, 28px) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.77rem;
+  letter-spacing: 0.015em;
+  color: var(--muted);
+}
+
+.hero__strip li {
+  display: flex;
+  align-items: center;
+}
+
+/* Bullet lives on the separator, so it never orphans onto a wrapped line. */
+.hero__strip li + li::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  margin-inline: 12px;
+  border-radius: 50%;
+  background: var(--champ-400);
+}
+
+/* ==========================================================================
+   RESPONSIVE — a distinct mobile composition, not a squeezed desktop
+   ========================================================================== */
+
+@media (max-width: 1180px) {
+  .hero__grid {
+    grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+  }
+}
+
+/* md / sm / xs — the artwork stays the section's background at every width.
+   It is never demoted to a band under the copy; instead the copy moves to the
+   top of the frame and the scrim turns vertical, so the words read against
+   washed paper while the photograph holds the lower half of the screen. */
+@media (max-width: 1080px) {
+  .hero {
+    /* The desktop ratio is driven by the artwork's composition beside the
+       copy; stacked, height comes from the copy plus room for the image. */
+    aspect-ratio: auto;
+    min-height: min(96svh, 800px);
+    align-items: flex-start;
+    padding-block: clamp(96px, 13vh, 128px) clamp(48px, 9vh, 96px);
+  }
+
+  .hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero__copy {
+    max-width: 100%;
+  }
+
+  /* Bias the crop away from the right edge so the model stays in frame as the
+     viewport narrows, rather than being pushed out of it. */
+  .hm__img {
+    object-position: 74% bottom;
+  }
+
+  .hm__wash {
+    background: linear-gradient(
+      177deg,
+      var(--paper) 0%,
+      rgba(254, 254, 254, 0.96) 30%,
+      rgba(254, 254, 254, 0.72) 46%,
+      rgba(254, 254, 254, 0.2) 68%,
+      rgba(254, 254, 254, 0) 84%
+    );
+  }
+
+  .hm__foot {
+    height: 18%;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: min(98svh, 760px);
+  }
+
+  /* Narrower crops need the wash to hold longer before the artwork appears. */
+  .hm__wash {
+    background: linear-gradient(
+      177deg,
+      var(--paper) 0%,
+      rgba(254, 254, 254, 0.97) 36%,
+      rgba(254, 254, 254, 0.78) 54%,
+      rgba(254, 254, 254, 0.24) 74%,
+      rgba(254, 254, 254, 0) 88%
+    );
+  }
+
+  .hm__img {
+    object-position: 78% bottom;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero {
+    min-height: min(96svh, 680px);
+    padding-block: clamp(88px, 12vh, 108px) clamp(40px, 7vh, 72px);
+  }
+
+  .hero__title {
+    font-size: clamp(1.95rem, 8.4vw, 2.5rem);
+  }
+
+  /* Below this the pair genuinely cannot share a line. */
+  .hero__ctas {
+    flex-wrap: wrap;
+  }
+
+  .mbtn {
+    flex: 1 1 100%;
+  }
+
+  .mbtn__inner {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .hm__img {
+    object-position: 82% bottom;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .mbtn--solid::after {
+    display: none;
+  }
+}

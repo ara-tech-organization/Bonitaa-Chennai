@@ -1,4 +1,3 @@
-import { CLINIC } from '../data'
 import { useCall } from '../callStore'
 import { useReveal } from '../hooks'
 import Icon from './Icon'
@@ -46,7 +45,6 @@ export default function Booking() {
               <Icon name="PhoneCall" size={17} />
               Speak to a Specialist
             </button>
-            <small className="booking__call-num">{CLINIC.phoneDisplay}</small>
           </div>
         </div>
 
