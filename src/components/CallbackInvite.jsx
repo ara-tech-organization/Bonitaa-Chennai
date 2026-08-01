@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useScrollLock } from '../hooks'
 import Icon from './Icon'
 import LeadForm from './LeadForm'
@@ -14,11 +14,19 @@ const TIME_TRIGGER_MS = 3000
  * Scoped to the page load rather than the browser session, so a refresh shows
  * it again — the `done` ref only stops it re-opening within one visit.
  */
-export default function CallbackInvite() {
+export default function CallbackInvite({ onDismiss }) {
   const [open, setOpen] = useState(false)
   const done = useRef(false)
+  const submitted = useRef(false)
 
   useScrollLock(open)
+
+  /* Every close path routes through here, so the follow-up cannot be missed by
+     one of them — and a completed enquiry never arms it. */
+  const close = useCallback(() => {
+    setOpen(false)
+    if (!submitted.current) onDismiss?.()
+  }, [onDismiss])
 
   useEffect(() => {
     const fire = () => {
@@ -51,15 +59,15 @@ export default function CallbackInvite() {
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e) => e.key === 'Escape' && setOpen(false)
+    const onKey = (e) => e.key === 'Escape' && close()
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [open, close])
 
   if (!open) return null
 
   return (
-    <div className="overlay is-open" onClick={() => setOpen(false)}>
+    <div className="overlay is-open" onClick={close}>
       <div
         className="invite"
         role="dialog"
@@ -67,7 +75,7 @@ export default function CallbackInvite() {
         aria-labelledby="invite-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="invite__close" aria-label="Close" onClick={() => setOpen(false)}>
+        <button type="button" className="invite__close" aria-label="Close" onClick={close}>
           <Icon name="X" size={19} />
         </button>
 
@@ -83,9 +91,16 @@ export default function CallbackInvite() {
         </h3>
         <p className="invite__sub">Takes 15 seconds. We&apos;ll call you back today.</p>
 
-        <LeadForm variant="compact" idPrefix="invite" submitLabel="Request Callback" />
+        <LeadForm
+          variant="compact"
+          idPrefix="invite"
+          submitLabel="Request Callback"
+          onSuccess={() => {
+            submitted.current = true
+          }}
+        />
 
-        <button type="button" className="invite__dismiss" onClick={() => setOpen(false)}>
+        <button type="button" className="invite__dismiss" onClick={close}>
           No thanks, I&apos;ll browse
         </button>
       </div>

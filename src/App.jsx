@@ -1,7 +1,8 @@
-import { lazy } from 'react'
+import { lazy, useState } from 'react'
 import CallProvider from './CallProvider'
 import Booking from './components/Booking'
 import CallModal from './components/CallModal'
+import CallUrgency from './components/CallUrgency'
 import CallbackInvite from './components/CallbackInvite'
 import Header from './components/Header'
 import Hero from './components/hero/Hero'
@@ -25,6 +26,7 @@ const Footer = lazy(() => import('./components/Footer'))
 
 export default function App() {
   const reduced = usePrefersReducedMotion()
+  const [urgencyArmed, setUrgencyArmed] = useState(false)
   // Momentum scrolling is a motion effect — off when the user opts out.
   useSmoothScroll(!reduced)
   // Section links scroll without leaving a fragment behind in the URL.
@@ -68,7 +70,10 @@ export default function App() {
       </LazySection>
 
       <ActionBar />
-      <CallbackInvite />
+      {/* Dismissing the lead form arms the call popup, which follows three
+          seconds later. Submitting it does not — see CallbackInvite. */}
+      <CallbackInvite onDismiss={() => setUrgencyArmed(true)} />
+      <CallUrgency armed={urgencyArmed} />
       <CallModal />
     </CallProvider>
   )

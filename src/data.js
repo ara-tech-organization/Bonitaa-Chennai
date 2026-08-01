@@ -42,6 +42,31 @@ export const TRUST_STATS = [
   { icon: 'MapPin', value: '35+', label: 'Branches Across Tamil Nadu' },
 ]
 
+/**
+ * CALL-URGENCY POPUP — follows the lead form when it is dismissed.
+ *
+ * ⚠ EVERY VALUE BELOW IS A CLAIM ABOUT THE CLINIC. The figures are taken from
+ * the reference design and are placeholders: `wasPrice`, `nowPrice` and
+ * `slotsLeft` state a real offer and a real availability, and a struck-through
+ * price the clinic never charged is misleading advertising, not styling.
+ * Replace them with the clinic's actual numbers before this goes live.
+ *
+ * `windowMinutes` drives the countdown. It restarts on every page load, so it
+ * measures how long this visitor has been looking at the offer — not a
+ * deadline the clinic is keeping. If the offer does have a real end time, say
+ * so instead; a timer that resets on refresh is the kind of thing visitors
+ * notice and stop trusting the rest of the page over.
+ */
+export const URGENCY = {
+  slotsLeft: 6,
+  wasPrice: '₹699',
+  nowPrice: '₹99',
+  priceNote: 'Consultation today only',
+  windowMinutes: 15,
+  /* Restated compactly here — the popup has room for three, not five. */
+  proof: ['35+ Branches', '15+ Years', '10,000+ Patients'],
+}
+
 export const SERVICES = [
   {
     icon: 'Stethoscope',

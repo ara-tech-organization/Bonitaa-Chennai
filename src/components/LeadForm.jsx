@@ -17,7 +17,14 @@ const EMPTY = { name: '', phone: '', city: '', branch: '', date: '' }
  * The one enquiry form on the page. `variant="compact"` drops the date field
  * for the exit popup; `idPrefix` keeps input ids unique between instances.
  */
-export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLabel = 'Book Your Slot' }) {
+export default function LeadForm({
+  variant = 'full',
+  idPrefix = 'lead',
+  submitLabel = 'Book Your Slot',
+  /* Lets a host know the enquiry landed — the exit popup uses it to decide
+     whether a follow-up is appropriate. */
+  onSuccess,
+}) {
   const compact = variant === 'compact'
   const [values, setValues] = useState(EMPTY)
   const [errors, setErrors] = useState({})
@@ -57,6 +64,7 @@ export default function LeadForm({ variant = 'full', idPrefix = 'lead', submitLa
       })
       setStatus('done')
       setValues(EMPTY)
+      onSuccess?.()
     } catch {
       setStatus('error')
     }

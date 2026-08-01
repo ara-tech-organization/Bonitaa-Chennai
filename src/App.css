@@ -2772,6 +2772,243 @@
   font-size: 0.95rem;
 }
 
+/* ==========================================================================
+   CALL-URGENCY POPUP
+   Follows the lead form when it is dismissed. Shares the lead popup's card,
+   close button and dismiss link — it is the same conversation continued, not a
+   second design — but swaps the gold CTA for red. Gold is what every other
+   button on the page uses; a single warm red is what marks this one as the
+   different, time-bound offer without a second accent entering the system.
+   ========================================================================== */
+
+.urg {
+  --urg-red: #b23b2c;
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  margin-block: auto;
+  padding: clamp(22px, 3.2vw, 30px);
+  text-align: center;
+  border-radius: var(--r-lg);
+  background:
+    var(--grad-gold) top center / 100% 4px no-repeat,
+    linear-gradient(170deg, var(--white), var(--gold-050));
+  box-shadow: var(--sh-lg);
+  animation: modal-in 0.5s var(--ease) both;
+}
+
+.urg__tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.urg__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: var(--r-full);
+  background: var(--gold-100);
+  box-shadow: inset 0 0 0 1px var(--gold-200);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-900);
+}
+
+.urg__tag--live {
+  background: #fdecea;
+  box-shadow: inset 0 0 0 1px #f3cdc7;
+  color: var(--urg-red);
+}
+
+.urg__blip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--urg-red);
+}
+
+/* Only when motion is allowed — a pulsing dot is decoration, and it sits next
+   to the one claim on this card a visitor is most likely to be sceptical of. */
+.urg__blip.is-live {
+  animation: urg-blip 1.8s var(--ease-soft) infinite;
+}
+
+@keyframes urg-blip {
+  50% {
+    box-shadow: 0 0 0 5px rgba(178, 59, 44, 0.16);
+  }
+}
+
+.urg h3 {
+  font-size: clamp(1.2rem, 2.4vw, 1.46rem);
+  line-height: 1.24;
+}
+
+.urg__sub {
+  max-width: 34ch;
+  margin: 8px auto 16px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--body);
+}
+
+/* ---------- Price ---------- */
+
+.urg__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px 10px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--gold-050);
+  box-shadow: inset 0 0 0 1px var(--gold-200);
+}
+
+.urg__price s {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.urg__price svg {
+  align-self: center;
+  color: var(--gold-600);
+}
+
+.urg__price strong {
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.urg__price small {
+  flex: 1 0 100%;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Countdown ---------- */
+
+.urg__timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 11px 16px;
+  border-radius: var(--r-md);
+  background: var(--ink);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(253, 250, 244, 0.62);
+}
+
+.urg__timer time {
+  /* Tabular figures, or the whole row jitters once a second as the digits
+     change width. */
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-300);
+}
+
+/* ---------- Call ---------- */
+
+.urg__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 15px 20px;
+  border-radius: var(--r-full);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff8f6;
+  background: linear-gradient(122deg, #96301f, var(--urg-red) 52%, #a33628);
+  background-size: 200% 100%;
+  box-shadow: 0 14px 34px -12px rgba(178, 59, 44, 0.6);
+  transition:
+    transform 0.4s var(--ease),
+    background-position 0.7s var(--ease),
+    box-shadow 0.4s var(--ease);
+}
+
+.urg__cta:hover {
+  transform: translateY(-2px);
+  background-position: 100% 50%;
+  box-shadow: 0 18px 40px -12px rgba(178, 59, 44, 0.7);
+}
+
+.urg__proof {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 0;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.74rem;
+  color: var(--body);
+}
+
+/* Bullet lives on the separator, so it never orphans onto a wrapped line. */
+.urg__proof li + li::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-inline: 10px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: var(--champ-400);
+}
+
+.urg__note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.urg__note svg {
+  flex: none;
+  color: var(--gold-600);
+}
+
+@media (max-width: 400px) {
+  .urg {
+    padding: 18px 15px 20px;
+  }
+
+  .urg__price strong {
+    font-size: 1.6rem;
+  }
+
+  .urg__cta {
+    font-size: 0.92rem;
+    padding-inline: 14px;
+  }
+}
+
 /* The gold bar is a background layer on the card, not a strip laid over it.
    The card used to clip an absolutely-positioned bar with `overflow: hidden`,
    which it can no longer do — the branch dropdown has to be able to hang past
