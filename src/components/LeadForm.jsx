@@ -13,9 +13,11 @@ import Icon from './Icon'
    city is where they are travelling from. Both variants collect it. */
 const EMPTY = { name: '', phone: '', city: '', branch: '', date: '' }
 
+
 /**
- * The one enquiry form on the page. `variant="compact"` drops the date field
- * for the exit popup; `idPrefix` keeps input ids unique between instances.
+ * The one enquiry form on the page. Both variants ask the same five questions;
+ * `variant="compact"` only tightens the popup's spacing and labels.
+ * `idPrefix` keeps input ids unique between the two instances.
  */
 export default function LeadForm({
   variant = 'full',
@@ -45,7 +47,10 @@ export default function LeadForm({
     if (!validatePhone(values.phone)) next.phone = 'Enter a valid 10-digit mobile number'
     if (values.city.trim().length < 2) next.city = 'Please enter your city or area'
     if (!values.branch) next.branch = 'Please choose a branch'
-    if (!compact && !values.date) next.date = 'Pick a date that suits you'
+    /* Both variants now. The popup used to skip it, which meant it posted an
+       empty date — and the handler requires one, so every popup lead was
+       rejected while the booking form went through. */
+    if (!values.date) next.date = 'Pick a date that suits you'
     return next
   }
 
@@ -64,6 +69,8 @@ export default function LeadForm({
       })
       setStatus('done')
       setValues(EMPTY)
+      /* The host decides what "done" looks like — it shows the thank-you view
+         over the page and pushes the URL. Nothing navigates from here. */
       onSuccess?.()
     } catch {
       setStatus('error')
@@ -187,16 +194,16 @@ export default function LeadForm({
         {errors.branch && <span className="field__error">{errors.branch}</span>}
       </fieldset>
 
-      {!compact && (
-        <DatePicker
-          id={`${idPrefix}-date`}
-          label="Preferred Appointment Date"
-          placeholder="Choose a date"
-          value={values.date}
-          onChange={pick('date')}
-          error={errors.date}
-        />
-      )}
+      {/* In both variants. It is a field that opens a calendar, not an inline
+          grid, so it costs the popup one row rather than a whole month. */}
+      <DatePicker
+        id={`${idPrefix}-date`}
+        label={compact ? 'Preferred Date' : 'Preferred Appointment Date'}
+        placeholder="Choose a date"
+        value={values.date}
+        onChange={pick('date')}
+        error={errors.date}
+      />
 
       {/* Shorter in the popup, where the long form wraps to two lines and the
           card is already fighting for the viewport. */}

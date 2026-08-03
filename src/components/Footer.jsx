@@ -25,10 +25,19 @@ export default function Footer() {
               Chennai&apos;s trusted hair clinic — part of a 35+ branch network across Tamil Nadu, 15+
               years of experience, 10,000+ patients treated.
             </p>
-            <button type="button" className="ftr__phone" onClick={() => requestCall()}>
-              <Icon name="Phone" size={19} />
-              {CLINIC.phoneDisplay}
-            </button>
+            <div className="ftr__contact">
+              <button type="button" className="ftr__phone" onClick={() => requestCall()}>
+                <Icon name="Phone" size={19} />
+                {CLINIC.phoneDisplay}
+              </button>
+
+              {/* A real mailto rather than plain text — an address someone has
+                  to retype by hand is an address they do not write to. */}
+              <a className="ftr__mail" href={`mailto:${CLINIC.email}`}>
+                <Icon name="Mail" size={17} />
+                {CLINIC.email}
+              </a>
+            </div>
           </div>
 
           <div className="ftr__branches reveal" style={{ '--delay': '80ms' }}>

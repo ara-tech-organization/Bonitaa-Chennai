@@ -5,16 +5,25 @@ import { scrollToBooking, useCall } from '../callStore'
 import { useActiveSection, useScrollLock, useScrolledPast } from '../hooks'
 import Icon from './Icon'
 
+/* Page order, top to bottom: About, Results, Treatments, Reviews, FAQ. The menu
+   used to lead with Treatments while About came third, so clicking down the
+   list jumped backwards up the page and the active item skipped about as you
+   scrolled. Reading order and page order are the same thing now. */
 const NAV = [
-  { label: 'Treatments', href: '#treatments' },
-  { label: 'Results', href: '#results' },
+  { label: 'Home', href: '#top' },
   { label: 'About', href: '#about' },
+  { label: 'Results', href: '#results' },
+  { label: 'Treatments', href: '#treatments' },
   { label: 'Reviews', href: '#reviews' },
   { label: 'FAQ', href: '#faq' },
 ]
 
-/* Scroll-spy walks these in page order, which differs from the nav order. */
-const SECTION_IDS = ['about', 'results', 'treatments', 'reviews', 'faq']
+/* Derived, not restated — the scroll-spy needs exactly these ids in exactly
+   this order, and a second hand-written list is a second thing to get wrong.
+   Home is left out: the hero is where the page starts rather than a section
+   you arrive at, and including it would light Home up again every time the
+   spy found nothing else in view. */
+const SECTION_IDS = NAV.filter((item) => item.href !== '#top').map((item) => item.href.slice(1))
 
 export default function Header() {
   const stuck = useScrolledPast(24)
@@ -54,7 +63,9 @@ export default function Header() {
 
         <nav className="hdr__nav" aria-label="Sections">
           {NAV.map((item) => {
-            const isActive = item.href === `#${active}`
+            /* Home is active when nothing else is — that is precisely what
+               being at the top of the page means. */
+            const isActive = active ? item.href === `#${active}` : item.href === '#top'
             return (
               <a
                 key={item.href}
@@ -126,7 +137,9 @@ export default function Header() {
             <a
               key={item.href}
               href={item.href}
-              className={`drawer__link${item.href === `#${active}` ? ' is-active' : ''}`}
+              className={`drawer__link${
+                (active ? item.href === `#${active}` : item.href === '#top') ? ' is-active' : ''
+              }`}
               style={{ '--i': i }}
               onClick={() => setOpen(false)}
             >

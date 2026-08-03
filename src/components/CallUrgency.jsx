@@ -6,6 +6,8 @@ import Icon from './Icon'
 
 /* How long after the lead form is dismissed this follows it. */
 const DELAY_MS = 3000
+/* How often to look again while another dialog is still on screen. */
+const RETRY_MS = 800
 
 /** Seconds → "14:56". */
 const clock = (total) => {
@@ -37,11 +39,28 @@ export default function CallUrgency({ armed }) {
 
   useEffect(() => {
     if (!armed || done.current) return
-    const t = window.setTimeout(() => {
+
+    /* Never two dialogs at once. The lead form is closed by the time this is
+       armed, but three seconds is long enough for the visitor to have opened
+       the call modal, or submitted elsewhere and landed on the confirmation —
+       and stacking a second card on top of either is disorienting.
+       Waiting rather than giving up: the offer still lands, just once the
+       screen is the visitor's again. */
+    let timer = 0
+
+    const tick = () => {
+      if (document.querySelector('.overlay, .ty')) {
+        timer = window.setTimeout(tick, RETRY_MS)
+        return
+      }
       done.current = true
       setOpen(true)
-    }, DELAY_MS)
-    return () => window.clearTimeout(t)
+    }
+
+    timer = window.setTimeout(tick, DELAY_MS)
+    /* Closes over the live id, so a pending retry is cleared too — not just
+       the first timeout. */
+    return () => window.clearTimeout(timer)
   }, [armed])
 
   /* Counted down from a fixed end stamp rather than by decrementing once a

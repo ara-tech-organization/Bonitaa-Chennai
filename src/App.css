@@ -58,7 +58,10 @@
 }
 
 .hdr__logo img {
-  height: clamp(32px, 3.8vw, 42px);
+  /* One height everywhere. It was a clamp plus a separate rule below 400px, so
+     the wordmark grew and shrank across breakpoints and never quite matched
+     the drawer or the footer. A logo is a fixed mark, not a fluid one. */
+  height: 38px;
   width: auto;
   transition: transform 0.5s var(--ease);
 }
@@ -242,7 +245,7 @@
 }
 
 .drawer__logo {
-  height: 34px;
+  height: 38px;
   width: auto;
 }
 
@@ -2409,7 +2412,7 @@
 /* The wordmark is a gold gradient — on the bronze ground it reads as mud, so
    it is knocked out to solid cream instead. */
 .ftr__brand img {
-  height: clamp(38px, 4.4vw, 46px);
+  height: 44px;
   width: auto;
   margin-bottom: 20px;
   filter: brightness(0) invert(1);
@@ -2419,6 +2422,52 @@
   max-width: 40ch;
   font-size: 0.89rem;
   color: var(--f-body);
+}
+
+/* Stacked, not side by side: the two are a first choice and a fallback, and a
+   row made them read as equal options — with the address, being plain text
+   next to a pill, coming off as an afterthought tacked onto the button. */
+.ftr__contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+/* The same pill as the phone above it, one step quieter — a lighter outline,
+   a dimmer fill and normal weight. Matching it exactly would make two equal
+   buttons; the clinic answers faster by phone, and the pair should say so. */
+.ftr__mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px;
+  border-radius: var(--r-full);
+  border: 1px solid rgba(255, 240, 205, 0.2);
+  background: rgba(255, 249, 234, 0.05);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--f-body);
+  /* Long address, narrow column — it has to be allowed to break rather than
+     push the pill past the column edge. */
+  overflow-wrap: anywhere;
+  transition:
+    transform 0.35s var(--ease),
+    border-color 0.35s var(--ease-soft),
+    background 0.35s var(--ease-soft),
+    color 0.3s var(--ease-soft);
+}
+
+.ftr__mail svg {
+  flex: none;
+  color: var(--f-accent);
+}
+
+.ftr__mail:hover {
+  transform: translateY(-1px);
+  border-color: var(--gold-300);
+  background: rgba(255, 249, 234, 0.12);
+  color: var(--f-ink);
 }
 
 /* Outlined pill on the bronze ground — reads as a button without competing
@@ -2762,6 +2811,72 @@
   height: 21px;
 }
 
+/* The date trigger matches the inputs above it — the shared .pick__trigger
+   padding is set for the roomier booking form. */
+.invite .pick__trigger {
+  padding-block: 11px;
+}
+
+.invite .cal__open {
+  width: 27px;
+  height: 27px;
+}
+
+/* ---------- Popup height, by viewport height ----------
+   Width was the wrong axis to trim on. What actually constrains this card is
+   how tall the window is: a tablet in landscape and a phone in portrait can be
+   nowhere near each other in width and hit exactly the same wall. These fire
+   on height alone, so short laptop windows are covered too. */
+
+@media (max-height: 900px) {
+  /* The sub-line repeats what the submit button and the confidentiality note
+     both already say, so it is the first thing that can go. */
+  .invite__sub {
+    display: none;
+  }
+
+  .invite h3 {
+    font-size: 1.14rem;
+  }
+
+  .invite .form {
+    gap: 9px;
+  }
+
+  .invite .eyebrow {
+    margin-bottom: 9px;
+  }
+
+  .invite__dismiss {
+    margin-top: 9px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-height: 740px) {
+  /* The ✕ in the corner does the same job, so the link is duplication. */
+  .invite__dismiss {
+    display: none;
+  }
+
+  .invite .field__wrap input,
+  .invite .pick__trigger {
+    padding-block: 9px;
+  }
+
+  .invite .badge {
+    padding: 8px 10px;
+  }
+
+  .invite .field__label {
+    margin-bottom: 3px;
+  }
+
+  .invite {
+    padding: 18px 16px 20px;
+  }
+}
+
 .invite .form__note {
   font-size: 0.73rem;
   line-height: 1.45;
@@ -2770,6 +2885,135 @@
 .invite .btn--lg {
   padding-block: 14px;
   font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   THANK-YOU
+   Shown over the landing page after a submit. Not a modal — there is nothing
+   behind it to return to mid-task — so it covers the viewport in the page's
+   own paper rather than dimming it behind a scrim.
+   ========================================================================== */
+
+.ty {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  padding: clamp(14px, 4vw, 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: linear-gradient(168deg, var(--white) 0%, var(--cream) 58%, #fdf7ea 100%);
+  animation: fade-in 0.4s var(--ease-soft) both;
+}
+
+/* `margin: auto`, not `align-items: center`. Centred alignment overflows
+   equally in both directions once the card is taller than the window, and a
+   scroll container cannot scroll above its start edge — the heading would
+   become unreachable on a short phone. Auto margins centre when there is room
+   and simply stop when there is not. */
+.ty__card {
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: clamp(24px, 5vw, 44px);
+  text-align: center;
+  border-radius: var(--r-lg);
+  background:
+    var(--grad-cta) top center / 100% 4px no-repeat,
+    var(--white);
+  box-shadow: var(--sh-lg);
+  animation: modal-in 0.55s var(--ease) both;
+}
+
+.ty__ring {
+  display: grid;
+  place-items: center;
+  width: clamp(56px, 13vw, 68px);
+  height: clamp(56px, 13vw, 68px);
+  margin: 0 auto clamp(14px, 2.6vw, 20px);
+  border-radius: 50%;
+  color: var(--cta-ink);
+  background: var(--grad-cta);
+  background-size: 200% 100%;
+  box-shadow: 0 14px 34px -12px rgba(166, 124, 26, 0.5);
+}
+
+.ty__card h2 {
+  font-size: clamp(1.35rem, 3.6vw, 1.9rem);
+}
+
+.ty__lede {
+  max-width: 38ch;
+  margin: 10px auto 0;
+  font-size: 0.96rem;
+  line-height: 1.6;
+}
+
+.ty__next {
+  margin-top: clamp(16px, 3vw, 24px);
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  text-align: left;
+  background: var(--cream);
+  box-shadow: inset 0 0 0 1px var(--gold-200);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.ty__next strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-900);
+}
+
+.ty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: clamp(18px, 3.4vw, 26px);
+}
+
+.ty__fine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 16px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.ty__fine svg {
+  flex: none;
+  color: var(--gold-600);
+}
+
+@media (max-width: 460px) {
+  .ty__actions .btn {
+    width: 100%;
+  }
+}
+
+/* Short windows — the same trimming the popup does, for the same reason. */
+@media (max-height: 700px) {
+  .ty__lede {
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+
+  .ty__next {
+    margin-top: 14px;
+    font-size: 0.82rem;
+  }
+
+  .ty__actions .btn {
+    padding-block: 12px;
+  }
 }
 
 /* ==========================================================================
@@ -3605,6 +3849,27 @@
     font-size: 0.68rem;
   }
 
+  /* The date field pushed this card past a phone viewport again, so the last
+     of the reassurance copy goes. The ✕ in the corner already closes the card,
+     which is what the dismiss link duplicated; the sub-line repeats what the
+     submit button and the confidentiality note both already say. */
+  .invite__sub,
+  .invite__dismiss {
+    display: none;
+  }
+
+  .invite .form {
+    gap: 9px;
+  }
+
+  .invite h3 {
+    font-size: 1.08rem;
+  }
+
+  .invite .eyebrow {
+    margin-bottom: 9px;
+  }
+
   .services__grid,
   .why__grid {
     grid-template-columns: minmax(0, 1fr);
@@ -3638,6 +3903,16 @@
   .booking__call .btn,
   .ftr__phone {
     width: 100%;
+    justify-content: center;
+  }
+
+  /* The phone goes full width here, and the address centres under it to sit on
+     the same axis as the branch blocks below. */
+  .ftr__contact {
+    align-items: stretch;
+  }
+
+  .ftr__mail {
     justify-content: center;
   }
 
@@ -3744,10 +4019,6 @@
 
   .invite__sub {
     font-size: 0.82rem;
-  }
-
-  .hdr__logo img {
-    height: 30px;
   }
 
   .action-bar {

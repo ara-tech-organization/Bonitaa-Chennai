@@ -14,7 +14,7 @@ const TIME_TRIGGER_MS = 3000
  * Scoped to the page load rather than the browser session, so a refresh shows
  * it again — the `done` ref only stops it re-opening within one visit.
  */
-export default function CallbackInvite({ onDismiss }) {
+export default function CallbackInvite({ onDismiss, onSubmitted }) {
   const [open, setOpen] = useState(false)
   const done = useRef(false)
   const submitted = useRef(false)
@@ -97,6 +97,10 @@ export default function CallbackInvite({ onDismiss }) {
           submitLabel="Request Callback"
           onSuccess={() => {
             submitted.current = true
+            /* Close first: the confirmation belongs over the page, not stacked
+               inside a popup that is still open behind it. */
+            setOpen(false)
+            onSubmitted?.()
           }}
         />
 

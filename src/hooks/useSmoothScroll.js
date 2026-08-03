@@ -104,15 +104,24 @@ export default function useSmoothScroll(enabled = true) {
   }, [enabled])
 }
 
+/** Rewrites the address bar without navigating or touching the scroll. */
+function setPath(path) {
+  if (window.location.pathname === path) return
+  window.history.pushState({}, '', path + window.location.search)
+}
+
 /**
- * Keeps the address bar free of fragments. This is one page — "#treatments" in
- * the URL is noise, not a location anyone would want to link to.
+ * Turns in-page links into clean paths. This is one page — "#treatments" in the
+ * address bar is noise — so a click scrolls and writes `/treatments` instead.
  *
- * One delegated handler covers every in-page link, present and future. It
- * scrolls and then stops: because the default action never runs, the browser
- * never writes the fragment. Deliberately independent of `useSmoothScroll`,
- * which is switched off under reduced motion — the URL should stay clean
- * whether or not momentum scrolling is running.
+ * Only a click does. Scrolling deliberately leaves the URL alone: rewriting it
+ * as sections pass under the header made the address bar flicker through five
+ * paths on the way down, and the visitor never asked to go to any of them.
+ *
+ * One delegated handler covers every link, present and future. Because the
+ * default action never runs, the browser never writes the fragment. Kept
+ * independent of `useSmoothScroll`, which is off under reduced motion — the
+ * URLs should behave the same either way.
  */
 export function useCleanAnchors() {
   useEffect(() => {
@@ -135,20 +144,42 @@ export function useCleanAnchors() {
 
       /* The page's own top, not the top of the hero element — the hero begins
          under the fixed header, so offsetting it would leave a gap above. */
-      if (hash === '#top') smoothScrollTo(0)
-      else scrollToSection(target)
+      if (hash === '#top') {
+        smoothScrollTo(0)
+        setPath('/')
+      } else {
+        scrollToSection(target)
+        /* `#treatments` becomes `/treatments`. A path rather than a fragment:
+           it reads as a page on a site that only has one, and it is what
+           analytics can report on as a section view. */
+        setPath(hash.replace('#', '/'))
+      }
     }
 
     document.addEventListener('click', onClick)
     return () => document.removeEventListener('click', onClick)
   }, [])
 
-  /* A fragment can still arrive from outside — a shared or bookmarked link.
-     The browser has already jumped to the section by this point, so rewriting
-     the URL only cleans it up; it does not move the page. */
+  /* Two ways in from outside, both handled here.
+
+     A fragment — a shared or bookmarked `#about`. The browser has already
+     jumped there, so this only rewrites the URL into the path form.
+
+     A path — `/about`, opened or refreshed directly. Nothing scrolls on its
+     own, so the section has to be found and scrolled to. Section ids exist
+     from the first render even while a section is still a lazy placeholder,
+     which is what makes this work before anything below the fold has mounted. */
   useEffect(() => {
-    if (!window.location.hash) return
-    const { pathname, search } = window.location
-    window.history.replaceState(null, '', pathname + search)
+    const { hash, pathname } = window.location
+    const id = hash ? hash.slice(1) : pathname.replace(/^\/|\/$/g, '')
+    if (!id) return
+
+    const target = document.getElementById(id)
+    if (!target) return
+
+    if (hash) window.history.replaceState(null, '', `/${id}`)
+    /* After paint, so the observer-driven sections have had their first pass
+       and the scroll lands on real content rather than a reserved height. */
+    requestAnimationFrame(() => scrollToSection(target))
   }, [])
 }

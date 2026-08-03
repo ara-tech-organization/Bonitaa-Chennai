@@ -1,5 +1,5 @@
 /**
- * Builds the favicon set from the B monogram in src/assets/Logo.png.
+ * Builds the favicon from the B monogram in src/assets/Logo.png.
  * The source logo is never written to — this only reads it.
  *
  * Everything here is measured off the pixels rather than eyeballed:
@@ -54,15 +54,8 @@ async function main() {
     },
   ]
 
-  const transparent = await sharp({
-    create: { width: side, height: side, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
-  })
-    .composite(place)
-    .png()
-    .toBuffer()
-
-  /* iOS composites an apple-touch-icon onto black, so that one gets the page's
-     own cream instead of transparency. */
+  /* On the page's own cream rather than transparency: the single icon has to
+     look right on iOS too, and iOS composites transparency onto black. */
   const opaque = await sharp({
     create: { width: side, height: side, channels: 4, background: CREAM },
   })
@@ -70,11 +63,15 @@ async function main() {
     .png()
     .toBuffer()
 
-  await sharp(transparent).resize(32, 32).png({ compressionLevel: 9 }).toFile('public/favicon-32.png')
-  await sharp(transparent).resize(512, 512).png({ compressionLevel: 9 }).toFile('public/favicon-512.png')
-  await sharp(opaque).resize(180, 180).png({ compressionLevel: 9 }).toFile('public/apple-touch-icon.png')
+  /* One file for everything — tab, bookmark, Android home screen, iOS home
+     screen. Browsers downscale a 512px icon perfectly well, and three
+     near-identical PNGs was three things to keep in step for no visible gain.
+     It is the opaque version because iOS composites a transparent touch icon
+     onto black, which would have made the one shared file look wrong on
+     exactly one platform. */
+  await sharp(opaque).resize(512, 512).png({ compressionLevel: 9 }).toFile('public/favicon.png')
 
-  console.log(`cleared ${cleared} frame px · tile ${side}px · wrote 32 / 512 / apple-touch`)
+  console.log(`cleared ${cleared} frame px · tile ${side}px · wrote public/favicon.png`)
 }
 
 main()

@@ -1,8 +1,9 @@
-import { lazy, useState } from 'react'
+import { lazy, useEffect, useState } from 'react'
 import CallProvider from './CallProvider'
 import Booking from './components/Booking'
 import CallModal from './components/CallModal'
 import CallUrgency from './components/CallUrgency'
+import ThankYou from './components/ThankYou'
 import CallbackInvite from './components/CallbackInvite'
 import Header from './components/Header'
 import Hero from './components/hero/Hero'
@@ -24,20 +25,51 @@ const Reviews = lazy(() => import('./components/Reviews'))
 const Faq = lazy(() => import('./components/Faq'))
 const Footer = lazy(() => import('./components/Footer'))
 
+/* Pushed on submit so analytics has a URL for the conversion, and popped when
+   the visitor leaves the confirmation. Nothing is served at this path — it is
+   a history entry over the landing page, not a document. */
+const THANK_YOU_PATH = '/thank-you'
+
 export default function App() {
   const reduced = usePrefersReducedMotion()
   const [urgencyArmed, setUrgencyArmed] = useState(false)
+  const [thanked, setThanked] = useState(false)
   // Momentum scrolling is a motion effect — off when the user opts out.
   useSmoothScroll(!reduced)
   // Section links scroll without leaving a fragment behind in the URL.
   useCleanAnchors()
+
+  const showThanks = () => {
+    window.history.pushState({ thanked: true }, '', THANK_YOU_PATH)
+    setThanked(true)
+    /* A single-page site fires no real pageview, so GTM is told by hand. This
+       is what a "thank-you page" trigger keys off — the `lead_form_submitted`
+       event from submitLead.js arrives alongside it. */
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({ event: 'virtual_pageview', page_path: THANK_YOU_PATH })
+  }
+
+  const hideThanks = () => {
+    setThanked(false)
+    if (window.location.pathname === THANK_YOU_PATH) {
+      window.history.pushState({}, '', '/')
+    }
+  }
+
+  /* The confirmation is a real history entry, so Back closes it and returns to
+     the form — which is what pressing Back is asking for. */
+  useEffect(() => {
+    const onPop = () => setThanked(window.location.pathname === THANK_YOU_PATH)
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
 
   return (
     <CallProvider>
       <Header />
       <main>
         <Hero />
-        <Booking />
+        <Booking onSubmitted={showThanks} />
         <TrustBar />
 
         <LazySection anchorId="about" minHeight={620}>
@@ -72,8 +104,9 @@ export default function App() {
       <ActionBar />
       {/* Dismissing the lead form arms the call popup, which follows three
           seconds later. Submitting it does not — see CallbackInvite. */}
-      <CallbackInvite onDismiss={() => setUrgencyArmed(true)} />
+      <CallbackInvite onDismiss={() => setUrgencyArmed(true)} onSubmitted={showThanks} />
       <CallUrgency armed={urgencyArmed} />
+      <ThankYou open={thanked} onClose={hideThanks} />
       <CallModal />
     </CallProvider>
   )

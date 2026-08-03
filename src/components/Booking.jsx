@@ -9,7 +9,7 @@ const ASSURANCES = [
   { icon: 'Lock', text: 'Your details are never shared or sold' },
 ]
 
-export default function Booking() {
+export default function Booking({ onSubmitted }) {
   const ref = useReveal()
   const { requestCall } = useCall()
 
@@ -60,7 +60,7 @@ export default function Booking() {
               Replies in 30 min
             </span>
           </div>
-          <LeadForm idPrefix="lead" />
+          <LeadForm idPrefix="lead" onSuccess={onSubmitted} />
         </div>
       </div>
     </section>

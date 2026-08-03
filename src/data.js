@@ -10,6 +10,11 @@ export const CLINIC = {
   shortName: 'Bonitaa',
   phoneDisplay: '+91 93637 00199',
   phoneHref: 'tel:+919363700199',
+  /* ⚠ This is the inbox the lead form delivers to (see submitLead.js), now
+     also shown publicly in the footer. If the clinic has a patient-facing
+     address, put that here instead — enquiries sent from the footer land
+     wherever this points, which may not be the same team. */
+  email: 'grow.10.x.org@gmail.com',
 }
 
 /* Addresses are stored as lines so each renders as its own block — no manual
@@ -80,7 +85,7 @@ export const SERVICES = [
   },
   {
     icon: 'TestTubes',
-    title: 'PRP / GFC Therapy',
+    title: 'GFC Therapy',
     copy: "Stimulate natural hair growth using your body's own growth factors.",
   },
   {
@@ -127,7 +132,7 @@ export const RESULTS = [
   { src: result1, caption: 'Crown density restored', treatment: 'Hair Fall Treatment' },
   { src: result2, caption: 'Hairline and mid-scalp regrowth', treatment: 'Hair GFC Therapy' },
   { src: result3, caption: 'Receding hairline rebuilt', treatment: 'Hair Transplant' },
-  { src: result4, caption: 'Thinning crown filled in', treatment: 'PRP / GFC Therapy' },
+  { src: result4, caption: 'Thinning crown filled in', treatment: 'GFC Therapy' },
   { src: result5, caption: 'Visible density at the crown', treatment: 'Hair Fall Treatment' },
   { src: result6, caption: 'Widening parting corrected', treatment: 'Mesotherapy' },
 ]

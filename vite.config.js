@@ -5,6 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   // Served from https://ara-tech-organization.github.io/Bonitaa-Chennai/,
   // so assets must resolve under that sub-path, not the domain root.
-  base: '/Bonitaa-Chennai/',
+  base: '/',
   plugins: [react()],
 })
