@@ -25,7 +25,13 @@ export default function Faq() {
           {FAQS.map((item, i) => {
             const isOpen = open === i
             return (
-              <div key={item.q} className={`qa reveal${isOpen ? ' is-open' : ''}`} style={{ '--delay': `${i * 60}ms` }}>
+              /* Deliberately not a `.reveal`. That class parks an element at
+                 opacity 0 until an observer adds `.is-in`, and a miss leaves
+                 the question invisible while its box still takes up the room —
+                 which read as a tall blank gap above the answers that did
+                 appear. The heading and the CTA still animate in; the
+                 questions, which are the section's whole content, just show. */
+              <div key={item.q} className={`qa${isOpen ? ' is-open' : ''}`}>
                 <button
                   type="button"
                   className="qa__q"

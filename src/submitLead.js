@@ -24,6 +24,13 @@ const LEAD_ENDPOINT =
   import.meta.env.VITE_LEAD_ENDPOINT || 'https://chennai.bonitaa.co.in/api/email.php'
 const DELIVERY_OFF = LEAD_ENDPOINT === 'off'
 
+/* How long the visitor waits before being thanked regardless. */
+const ACK_MS = 3000
+
+/* Hard ceiling on the request itself, long after the visitor has stopped
+   waiting — a backstop against a hung connection, not a performance target. */
+const REQUEST_TIMEOUT_MS = 20000
+
 /**
  * Fires `lead_form_submitted` on the GTM dataLayer.
  *
@@ -98,30 +105,81 @@ export async function submitLead(lead) {
     return new Error(reason)
   }
 
-  let res
-  try {
-    res = await fetch(LEAD_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload),
-    })
-  } catch (networkError) {
-    /* fetch only rejects before it gets an answer at all: DNS, TLS, a blocked
-       mixed-content request, or a CORS preflight the handler did not answer.
-       Every one of those is a deployment problem, not a bad submission. */
-    throw fail(`could not reach the handler (${networkError.message})`)
+  /** The whole round trip: post, then decide whether it counted. */
+  const deliver = async () => {
+    const abort = new AbortController()
+    const timer = window.setTimeout(() => abort.abort(), REQUEST_TIMEOUT_MS)
+
+    let res
+    try {
+      res = await fetch(LEAD_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload),
+        signal: abort.signal,
+        /* Survives the page being closed or navigated mid-flight, so a lead
+           already on the wire is not thrown away. */
+        keepalive: true,
+      })
+    } catch (networkError) {
+      /* fetch only rejects before it gets an answer at all: DNS, TLS, a
+         blocked mixed-content request, a CORS preflight the handler did not
+         answer — or the timeout above. All deployment problems, not bad
+         submissions. */
+      throw fail(
+        networkError.name === 'AbortError'
+          ? `handler did not answer within ${REQUEST_TIMEOUT_MS / 1000}s`
+          : `could not reach the handler (${networkError.message})`,
+      )
+    } finally {
+      window.clearTimeout(timer)
+    }
+
+    if (!res.ok) throw fail(`handler answered ${res.status}`)
+
+    /* A handler that answers JSON gets read for an explicit failure; one that
+       answers anything else is trusted on its status code, since PHP mail
+       handlers commonly just echo a string or nothing at all. */
+    const body = await res.json().catch(() => null)
+    if (body && body.success === false) {
+      throw fail(`handler rejected it${body.message ? ` — "${body.message}"` : ''}`)
+    }
   }
 
-  /* Deliberately before the push — a throw here skips it, so a failed
-     submission never counts as a lead. */
-  if (!res.ok) throw fail(`handler answered ${res.status}`)
+  /*
+   * Nobody waits longer than ACK_MS to be thanked.
+   *
+   * The handler sends an email and pushes a row to a Google Apps Script before
+   * it replies, and an Apps Script cold start alone can run past ten seconds.
+   * That is a real ~20s wait on a submit button, which reads as a broken form
+   * and gets clicked again.
+   *
+   * So the two are decoupled: a failure that lands inside the window is still
+   * reported, and after it the request is simply left to finish on its own.
+   *
+   * The trade-off, stated plainly: a failure occurring after ACK_MS is logged
+   * but never shown — the visitor has already been thanked. That is the right
+   * side to err on here, because the slow path is the handler succeeding
+   * slowly, and the fast failures (host down, TLS, CORS) all reject in well
+   * under a second. The proper fix is still server-side: answer the browser
+   * first, write the sheet after.
+   */
+  const request = deliver()
+  /* Claimed here so a late rejection is never an unhandled one. */
+  request.catch(() => {})
 
-  /* A handler that answers JSON gets read for an explicit failure; one that
-     answers anything else is trusted on its status code, since PHP mail
-     handlers commonly just echo a string or nothing at all. */
-  const body = await res.json().catch(() => null)
-  if (body && body.success === false) {
-    throw fail(`handler rejected it${body.message ? ` — "${body.message}"` : ''}`)
+  const settledInTime = await Promise.race([
+    request.then(() => true),
+    new Promise((resolve) => window.setTimeout(() => resolve(false), ACK_MS)),
+  ])
+
+  if (!settledInTime) {
+    /* Still in flight. Track only if it actually lands. */
+    request.then(
+      () => trackLeadSubmitted(lead.source),
+      () => {},
+    )
+    return { ok: true, delivered: false }
   }
 
   trackLeadSubmitted(lead.source)
