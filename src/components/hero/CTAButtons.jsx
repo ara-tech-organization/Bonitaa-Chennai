@@ -1,4 +1,5 @@
 import { ArrowUpRight, PhoneCall } from 'lucide-react'
+import CallLink from '../CallLink'
 
 /**
  * The hero's CTA pair.
@@ -10,18 +11,21 @@ import { ArrowUpRight, PhoneCall } from 'lucide-react'
  * the same lift-and-shadow every other button on the page uses.
  *
  * Framer Motion went with them — nothing here animates from JS any more.
+ *
+ * The call CTA is a `tel:` anchor (see CallLink) rather than a button, so the
+ * number is a real link everywhere the page offers a call.
  */
-export default function CTAButtons({ onCall, onBook }) {
+export default function CTAButtons({ onBook }) {
   return (
     <div className="hero__ctas">
-      <button type="button" className="mbtn mbtn--solid" onClick={onCall}>
+      <CallLink className="mbtn mbtn--solid">
         <span className="mbtn__inner">
           <span className="mbtn__icon mbtn__icon--lead">
             <PhoneCall size={16} strokeWidth={1.7} />
           </span>
           <span className="mbtn__label">Speak to a Specialist</span>
         </span>
-      </button>
+      </CallLink>
 
       <button type="button" className="mbtn mbtn--glass" onClick={onBook}>
         <span className="mbtn__inner">

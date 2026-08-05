@@ -17,10 +17,20 @@ function CallDialog({ branch, onCancel }) {
 
   useScrollLock(true)
 
+  /* The countdown's own hand-off — the button below is a real link and lets the
+     browser do the navigating, so this is only for the auto-dial. */
   const dial = () => {
     if (dialed.current) return
     dialed.current = true
     window.location.href = CLINIC.phoneHref
+    onCancel()
+  }
+
+  /* Tapping the button: the anchor's own `tel:` href opens the dialer, so the
+     default is left alone — this only stops the countdown firing a second
+     navigation behind it and closes the card. */
+  const onDialClick = () => {
+    dialed.current = true
     onCancel()
   }
 
@@ -70,10 +80,10 @@ function CallDialog({ branch, onCancel }) {
         </h3>
         <p className="call__number">{CLINIC.phoneDisplay}</p>
 
-        <button type="button" className="btn btn--gold btn--block" onClick={dial}>
+        <a className="btn btn--gold btn--block" href={CLINIC.phoneHref} onClick={onDialClick}>
           <Icon name="Phone" size={17} />
           Call Now
-        </button>
+        </a>
 
         <div className="call__track" aria-hidden="true">
           <span style={{ transform: `scaleX(${progress})` }} />

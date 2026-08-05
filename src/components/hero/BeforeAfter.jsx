@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import shot1 from '../../assets/WhatsApp Image 2026-07-08 at 12.10.35 PM.jpeg'
-import shot2 from '../../assets/WhatsApp Image 2026-07-08 at 12.10.40 PM.jpeg'
-import shot3 from '../../assets/WhatsApp Image 2026-07-08 at 12.10.40 PM (1).jpeg'
+import shot1 from '../../assets/result-1-crown-density.jpeg'
+import shot2 from '../../assets/result-2-hairline-regrowth.png'
+import shot3 from '../../assets/result-3-hairline-rebuilt.png'
 import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion'
 
 /* Three cases, imported directly rather than through data.js — the hero is the

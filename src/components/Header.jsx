@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import logo from '../assets/Logo.png'
 import { CLINIC } from '../data'
-import { scrollToBooking, useCall } from '../callStore'
+import { scrollToBooking } from '../callStore'
 import { useActiveSection, useScrollLock, useScrolledPast } from '../hooks'
+import CallLink from './CallLink'
 import Icon from './Icon'
 
 /* Page order, top to bottom: About, Results, Treatments, Reviews, FAQ. The menu
@@ -29,7 +30,6 @@ export default function Header() {
   const stuck = useScrolledPast(24)
   const active = useActiveSection(SECTION_IDS)
   const [open, setOpen] = useState(false)
-  const { requestCall } = useCall()
 
   const burgerRef = useRef(null)
   const closeRef = useRef(null)
@@ -80,17 +80,15 @@ export default function Header() {
         </nav>
 
         <div className="hdr__actions">
-          <button
-            type="button"
+          <CallLink
             className="hdr__phone"
-            onClick={() => requestCall()}
             aria-label={`Call the clinic on ${CLINIC.phoneDisplay}`}
           >
             <span className="hdr__phone-ring">
               <Icon name="Phone" size={15} />
             </span>
             <strong className="hdr__phone-num">{CLINIC.phoneDisplay}</strong>
-          </button>
+          </CallLink>
 
           <button type="button" className="btn btn--gold hdr__cta" onClick={scrollToBooking}>
             Book a Consultation

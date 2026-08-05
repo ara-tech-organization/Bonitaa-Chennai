@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { FAQS } from '../data'
-import { useCall } from '../callStore'
 import { useReveal } from '../hooks'
+import CallLink from './CallLink'
 import Icon from './Icon'
 
 export default function Faq() {
   const ref = useReveal()
   const [open, setOpen] = useState(0)
-  const { requestCall } = useCall()
 
   return (
     <section className="section section--cream faq" id="faq" ref={ref}>
@@ -56,10 +55,10 @@ export default function Faq() {
 
         <div className="faq__cta reveal">
           <p>Still have questions?</p>
-          <button type="button" className="btn btn--outline btn--lg" onClick={() => requestCall()}>
+          <CallLink className="btn btn--outline btn--lg">
             <Icon name="PhoneCall" size={18} />
             Call the Clinic Directly
-          </button>
+          </CallLink>
         </div>
       </div>
     </section>

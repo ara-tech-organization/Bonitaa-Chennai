@@ -1,11 +1,10 @@
 import { SERVICES } from '../data'
-import { useCall } from '../callStore'
 import { useReveal } from '../hooks'
+import CallLink from './CallLink'
 import Icon from './Icon'
 
 export default function Services() {
   const ref = useReveal()
-  const { requestCall } = useCall()
 
   return (
     <section className="section services" id="treatments" ref={ref}>
@@ -44,10 +43,10 @@ export default function Services() {
             <strong>Not sure which treatment you need?</strong>
             <span>Our specialist will tell you after a scalp assessment — no guesswork.</span>
           </div>
-          <button type="button" className="btn btn--gold" onClick={() => requestCall()}>
+          <CallLink className="btn btn--gold">
             <Icon name="PhoneCall" size={17} />
             Ask Our Specialist
-          </button>
+          </CallLink>
         </div>
       </div>
     </section>

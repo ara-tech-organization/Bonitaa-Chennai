@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { scrollToBooking, useCall } from '../../callStore'
+import { scrollToBooking } from '../../callStore'
 import BeforeAfter from './BeforeAfter'
 import CTAButtons from './CTAButtons'
 import { EYEBROW, HEADLINE, LEDE, SUBHEAD } from './heroContent'
@@ -8,8 +8,6 @@ import './hero.css'
 const ease = [0.22, 1, 0.36, 1]
 
 export default function Hero() {
-  const { requestCall } = useCall()
-
   /* No scroll-linked motion here. The words each animate in once on load and
      then hold — nothing in this section moves as the page scrolls. */
   return (
@@ -77,9 +75,9 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.74, ease }}
           >
-            {/* "Speak to a Specialist" leads, per the brief. It routes through
-                the call confirmation modal, which then opens the tel: link. */}
-            <CTAButtons onCall={() => requestCall()} onBook={scrollToBooking} />
+            {/* "Speak to a Specialist" leads, per the brief. It is a tel: link
+                that routes through the call confirmation modal on click. */}
+            <CTAButtons onBook={scrollToBooking} />
           </motion.div>
         </div>
 

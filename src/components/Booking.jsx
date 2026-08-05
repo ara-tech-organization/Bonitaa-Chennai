@@ -1,5 +1,5 @@
-import { useCall } from '../callStore'
 import { useReveal } from '../hooks'
+import CallLink from './CallLink'
 import Icon from './Icon'
 import LeadForm from './LeadForm'
 
@@ -11,7 +11,6 @@ const ASSURANCES = [
 
 export default function Booking({ onSubmitted }) {
   const ref = useReveal()
-  const { requestCall } = useCall()
 
   return (
     <section className="section booking" id="book" ref={ref}>
@@ -41,10 +40,10 @@ export default function Booking({ onSubmitted }) {
 
           <div className="booking__call">
             <p>Prefer to talk right away?</p>
-            <button type="button" className="btn btn--outline" onClick={() => requestCall()}>
+            <CallLink className="btn btn--outline">
               <Icon name="PhoneCall" size={17} />
               Speak to a Specialist
-            </button>
+            </CallLink>
           </div>
         </div>
 

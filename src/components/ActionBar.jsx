@@ -1,4 +1,5 @@
-import { scrollToBooking, useCall } from '../callStore'
+import { scrollToBooking } from '../callStore'
+import CallLink from './CallLink'
 import Icon from './Icon'
 
 /**
@@ -11,18 +12,12 @@ import Icon from './Icon'
  * to a burger and no longer carries either action.
  */
 export default function ActionBar() {
-  const { requestCall } = useCall()
-
   return (
     <div className="action-bar">
-      <button
-        type="button"
-        className="action-bar__btn action-bar__btn--call"
-        onClick={() => requestCall()}
-      >
+      <CallLink className="action-bar__btn action-bar__btn--call">
         <Icon name="Phone" size={18} />
         Call Now
-      </button>
+      </CallLink>
 
       <button
         type="button"

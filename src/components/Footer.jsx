@@ -1,7 +1,7 @@
 import logo from '../assets/Logo.png'
 import { BRANCHES, CLINIC } from '../data'
-import { useCall } from '../callStore'
 import { useReveal } from '../hooks'
+import CallLink from './CallLink'
 import Icon from './Icon'
 
 const LINKS = [
@@ -13,7 +13,6 @@ const LINKS = [
 
 export default function Footer() {
   const ref = useReveal()
-  const { requestCall } = useCall()
 
   return (
     <footer className="ftr" ref={ref}>
@@ -26,10 +25,12 @@ export default function Footer() {
               years of experience, 10,000+ patients treated.
             </p>
             <div className="ftr__contact">
-              <button type="button" className="ftr__phone" onClick={() => requestCall()}>
+              {/* A real tel:, matching the mailto below — the number is the
+                  contact detail here, so it has to behave like one. */}
+              <CallLink className="ftr__phone">
                 <Icon name="Phone" size={19} />
                 {CLINIC.phoneDisplay}
-              </button>
+              </CallLink>
 
               {/* A real mailto rather than plain text — an address someone has
                   to retype by hand is an address they do not write to. */}

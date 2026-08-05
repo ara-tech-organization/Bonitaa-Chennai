@@ -7,9 +7,16 @@
 # someone refreshes, opens one in a new tab, or follows a shared link, Apache
 # is asked for a file that is not there and answers 404.
 #
-# This hands every such request to index.html and lets the app scroll to the
+# This hands those requests to index.html and lets the app scroll to the
 # matching section on load. Real files and directories are served untouched, so
 # /api/email.php, the assets and the favicons are unaffected.
+#
+# The list is exhaustive on purpose. A blanket `RewriteRule . /index.html`
+# answers *every* URL with the homepage — /skin, /no, /anything-at-all all
+# returned the full site with a 200, which means a typo looks like a real page,
+# and search engines index unlimited duplicate URLs. Anything not named here now
+# falls through to Apache, which finds no file and serves 404.html with a real
+# 404 status. Add a path here only when the app can actually route to it.
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -24,8 +31,13 @@
   # returns a 404 rather than silently serving the site's HTML to a fetch().
   RewriteRule ^api/ - [L]
 
-  RewriteRule . /index.html [L]
+  # The section ids the nav writes with pushState (see useCleanAnchors), plus
+  # the path the lead form pushes on success.
+  RewriteRule ^(top|about|results|treatments|reviews|faq|book|thank-you)/?$ /index.html [L]
 </IfModule>
+
+# Everything else. Without this Apache answers with its own bare error page.
+ErrorDocument 404 /404.html
 
 # Hashed filenames from the build are safe to cache hard; index.html must not
 # be, or a deploy leaves visitors on the previous bundle.
